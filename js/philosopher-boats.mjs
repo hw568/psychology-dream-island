@@ -22,7 +22,7 @@ export const PHILOSOPHERS_DATA = [
     psychologyConnection: '連結「感知覺醒島」與「理性思維島」：認知心理學中的元認知（Metacognition）與批判性思維。',
     relatedCourseId: 'island-01',
     relatedCourseName: '感知覺醒島',
-    route: { radiusX: 40, radiusZ: 46, speed: 0.020, phase: 3.4, height: -1.2 }
+    route: { radiusX: 50, radiusZ: 58, speed: 0.022, phase: 0.2, height: -1.2 }
   },
   {
     id: 'socrates',
@@ -39,7 +39,7 @@ export const PHILOSOPHERS_DATA = [
     psychologyConnection: '連結「中央衛城」與「理性思維島」：認知行為治療（CBT）的蘇格拉底提問法與自我覺察。',
     relatedCourseId: 'island-03',
     relatedCourseName: '理性思維島',
-    route: { radiusX: 38, radiusZ: 44, speed: 0.025, phase: 5.7, height: -1.2 }
+    route: { radiusX: 58, radiusZ: 48, speed: 0.020, phase: 1.8, height: -1.2 }
   },
   {
     id: 'simone',
@@ -56,7 +56,7 @@ export const PHILOSOPHERS_DATA = [
     psychologyConnection: '連結「人格演繹島」與「動機與情緒島」：發展心理學中的自我認同探索、性別基模與自我實現。',
     relatedCourseId: 'island-05',
     relatedCourseName: '人格演繹島',
-    route: { radiusX: 40, radiusZ: 38, speed: 0.026, phase: 0.9, height: -1.2 }
+    route: { radiusX: 52, radiusZ: 62, speed: 0.019, phase: 3.4, height: -1.2 }
   },
   {
     id: 'hannah',
@@ -73,7 +73,7 @@ export const PHILOSOPHERS_DATA = [
     psychologyConnection: '連結「社會共振島」：社會心理學中的阿許從眾實驗、米爾格倫服從權威與責任分散效應。',
     relatedCourseId: 'island-06',
     relatedCourseName: '社會共振島',
-    route: { radiusX: 44, radiusZ: 36, speed: 0.022, phase: 1.8, height: -1.2 }
+    route: { radiusX: 60, radiusZ: 52, speed: 0.018, phase: 4.6, height: -1.2 }
   },
   {
     id: 'mary-calkins',
@@ -90,7 +90,7 @@ export const PHILOSOPHERS_DATA = [
     psychologyConnection: '連結「記憶之宮島」與「人格演繹島」：配對聯想記憶研究與自尊心理學。',
     relatedCourseId: 'island-02',
     relatedCourseName: '記憶之宮島',
-    route: { radiusX: 46, radiusZ: 40, speed: 0.019, phase: 4.6, height: -1.2 }
+    route: { radiusX: 48, radiusZ: 56, speed: 0.023, phase: 5.7, height: -1.2 }
   },
   {
     id: 'aristotle',
@@ -107,7 +107,7 @@ export const PHILOSOPHERS_DATA = [
     psychologyConnection: '連結「記憶之宮島」與「動機與情緒島」：行為習慣養成、經驗主義與正向心理學（Eudaimonia）。',
     relatedCourseId: 'island-04',
     relatedCourseName: '動機與情緒島',
-    route: { radiusX: 42, radiusZ: 42, speed: 0.021, phase: 2.7, height: -1.2 }
+    route: { radiusX: 56, radiusZ: 56, speed: 0.020, phase: 2.7, height: -1.2 }
   },
   {
     id: 'descartes',
@@ -124,7 +124,7 @@ export const PHILOSOPHERS_DATA = [
     psychologyConnection: '連結「感知覺醒島」：神經反射弧模型、身心關係與知覺懷疑論。',
     relatedCourseId: 'island-01',
     relatedCourseName: '感知覺醒島',
-    route: { radiusX: 36, radiusZ: 42, speed: 0.024, phase: 0.2, height: -1.2 }
+    route: { radiusX: 52, radiusZ: 48, speed: 0.024, phase: 0.9, height: -1.2 }
   }
 ];
 

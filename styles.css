@@ -789,3 +789,103 @@ html[data-theme=night] .philosopher-boat-tag:hover {
   background: rgba(45, 40, 100, 0.95);
   border-color: #ffe066;
 }
+
+
+/* ========================================================= */
+/* Enhanced Label Typography & Comfortable Reading Spacing    */
+/* ========================================================= */
+.island-label {
+  font-size: 13px;
+  min-height: 48px;
+  padding: 6px 4px;
+  max-width: none;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+.island-name-plate {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
+  border: 1.5px solid #d4c5d8;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 4px 16px rgba(45, 30, 60, 0.16);
+  color: #3b2a4c;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+  backdrop-filter: blur(8px);
+  transition: transform 0.15s, background 0.15s, box-shadow 0.15s;
+}
+.island-label:hover .island-name-plate {
+  background: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(107, 77, 132, 0.28);
+}
+.island-label b {
+  font-size: 11px;
+  font-weight: 800;
+  color: #ffffff;
+  background: #6b4d84;
+  padding: 2px 7px;
+  border-radius: 12px;
+  letter-spacing: 0.5px;
+}
+.island-label.center b {
+  background: #d97706;
+}
+.island-label.personal b {
+  background: #9333ea;
+}
+
+.building-label {
+  font-size: 13px;
+  min-height: 48px;
+}
+.building-label > span {
+  padding: 8px 16px;
+  border: 1.5px solid #b699c7;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 4px 16px rgba(107, 77, 132, 0.20);
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+.building-label:hover > span {
+  background: #fdf5ff;
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(107, 77, 132, 0.32);
+}
+
+.philosopher-boat-tag {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1.5px solid #d4a373;
+  border-radius: 20px;
+  padding: 4px 11px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #3e2723;
+  box-shadow: 0 4px 14px rgba(62, 39, 35, 0.20);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+  pointer-events: auto;
+  backdrop-filter: blur(6px);
+  transition: transform 0.15s, background 0.15s, border-color 0.15s;
+}
+.philosopher-boat-tag:hover {
+  background: #fffdf5;
+  border-color: #e76f51;
+  transform: translateY(-2px) scale(1.06);
+  box-shadow: 0 6px 18px rgba(231, 111, 81, 0.32);
+}
+.philosopher-boat-tag .boat-icon {
+  font-size: 13px;
+}

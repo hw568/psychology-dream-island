@@ -134,7 +134,136 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
  // =========================================================================
  // 1. CENTRAL ISLAND: 元認知與心靈總所 (Grand Triple-Tier Academic Acropolis)
  // =========================================================================
- const mainLayout=ISLAND_LAYOUT[0];
+ 
+  // =========================================================================
+  // THEMATIC PSYCHOLOGICAL ANIMAL COMPANIONS (3D Models)
+  // =========================================================================
+  function createDog(targetGroup, x, y, z) {
+    const dog = new THREE.Group();
+    dog.position.set(x, y, z);
+    targetGroup.add(dog);
+    const fur = mat('#d4a373');
+    const snout = mat('#795548');
+    const collar = mat('#e53935');
+    box(dog, 0.6, 0.7, 1.05, fur, 0, 0.45, 0);
+    cyl(dog, 0.09, 0.09, 0.5, fur, -0.22, 0.25, 0.38);
+    cyl(dog, 0.09, 0.09, 0.5, fur, 0.22, 0.25, 0.38);
+    cyl(dog, 0.09, 0.09, 0.5, fur, -0.22, 0.25, -0.38);
+    cyl(dog, 0.09, 0.09, 0.5, fur, 0.22, 0.25, -0.38);
+    ball(dog, 0.36, fur, 0, 1.05, 0.5);
+    box(dog, 0.25, 0.2, 0.3, snout, 0, 0.98, 0.8);
+    box(dog, 0.14, 0.28, 0.09, snout, -0.28, 1.15, 0.5).rotation.z = -0.3;
+    box(dog, 0.14, 0.28, 0.09, snout, 0.28, 1.15, 0.5).rotation.z = 0.3;
+    torus(dog, 0.26, 0.06, collar, 0, 0.86, 0.35).rotation.x = Math.PI / 2;
+    ball(dog, 0.09, gold, 0, 0.8, 0.56);
+    const tail = cyl(dog, 0.06, 0.09, 0.5, fur, 0, 0.85, -0.6);
+    tail.rotation.x = -Math.PI / 3;
+    animated.push({ obj: tail, kind: 'bell' });
+    return dog;
+  }
+
+  function createPigeon(targetGroup, x, y, z) {
+    const bird = new THREE.Group();
+    bird.position.set(x, y, z);
+    targetGroup.add(bird);
+    const grey = mat('#90a4ae');
+    const tealMat = mat('#26a69a');
+    ball(bird, 0.25, grey, 0, 0.28, 0);
+    ball(bird, 0.16, tealMat, 0, 0.42, 0.16);
+    cone(bird, 0.06, 0.14, mat('#ffb74d'), 0, 0.42, 0.3).rotation.x = Math.PI / 2;
+    box(bird, 0.09, 0.2, 0.35, grey, -0.18, 0.29, -0.05);
+    box(bird, 0.09, 0.2, 0.35, grey, 0.18, 0.29, -0.05);
+    box(bird, 0.2, 0.05, 0.3, grey, 0, 0.24, -0.32);
+    return bird;
+  }
+
+  function createOwl(targetGroup, x, y, z) {
+    const owl = new THREE.Group();
+    owl.position.set(x, y, z);
+    targetGroup.add(owl);
+    const brown = mat('#5d4037');
+    const chest = mat('#d7ccc8');
+    cyl(owl, 0.26, 0.3, 0.6, brown, 0, 0.35, 0);
+    ball(owl, 0.28, brown, 0, 0.72, 0);
+    ball(owl, 0.2, chest, 0, 0.35, 0.16);
+    ball(owl, 0.1, gold, -0.12, 0.75, 0.24);
+    ball(owl, 0.1, gold, 0.12, 0.75, 0.24);
+    ball(owl, 0.05, dark, -0.12, 0.75, 0.31);
+    ball(owl, 0.05, dark, 0.12, 0.75, 0.31);
+    cone(owl, 0.05, 0.12, gold, 0, 0.68, 0.3).rotation.x = Math.PI / 2;
+    cone(owl, 0.07, 0.16, brown, -0.16, 0.96, 0.06);
+    cone(owl, 0.07, 0.16, brown, 0.16, 0.96, 0.06);
+    return owl;
+  }
+
+  function createDolphin(targetGroup, x, y, z) {
+    const dGroup = new THREE.Group();
+    dGroup.position.set(x, y, z);
+    targetGroup.add(dGroup);
+    const dMat = mat('#38bdf8', { metalness: 0.2, roughness: 0.4 });
+    const belly = mat('#f0f9ff');
+    const dBody = cyl(dGroup, 0.24, 0.35, 1.5, dMat, 0, 0, 0);
+    dBody.rotation.x = Math.PI / 2.8;
+    ball(dGroup, 0.3, belly, 0, 0.38, 0.45);
+    cone(dGroup, 0.09, 0.4, dMat, 0, 0.46, 0.82).rotation.x = Math.PI / 2.4;
+    cone(dGroup, 0.09, 0.32, dMat, 0, 0.35, -0.05).rotation.x = -Math.PI / 5;
+    box(dGroup, 0.6, 0.06, 0.25, dMat, 0, -0.48, -0.7);
+    animated.push({ obj: dGroup, kind: 'boat', base: y });
+    return dGroup;
+  }
+
+  function createIbex(targetGroup, x, y, z) {
+    const ibex = new THREE.Group();
+    ibex.position.set(x, y, z);
+    targetGroup.add(ibex);
+    const coat = mat('#8d6e63');
+    const hornMat = mat('#37474f');
+    box(ibex, 0.48, 0.6, 0.9, coat, 0, 0.52, 0);
+    cyl(ibex, 0.08, 0.08, 0.6, coat, -0.2, 0.3, 0.35);
+    cyl(ibex, 0.08, 0.08, 0.6, coat, 0.2, 0.3, 0.35);
+    cyl(ibex, 0.08, 0.08, 0.6, coat, -0.2, 0.3, -0.35);
+    cyl(ibex, 0.08, 0.08, 0.6, coat, 0.2, 0.3, -0.35);
+    ball(ibex, 0.26, coat, 0, 0.95, 0.5);
+    torus(ibex, 0.32, 0.06, hornMat, -0.14, 1.25, 0.42).rotation.y = Math.PI / 3;
+    torus(ibex, 0.32, 0.06, hornMat, 0.14, 1.25, 0.42).rotation.y = -Math.PI / 3;
+    return ibex;
+  }
+
+  function createPeacock(targetGroup, x, y, z) {
+    const bird = new THREE.Group();
+    bird.position.set(x, y, z);
+    targetGroup.add(bird);
+    const cobalt = mat('#1a237e');
+    ball(bird, 0.24, cobalt, 0, 0.44, 0);
+    cyl(bird, 0.11, 0.13, 0.5, cobalt, 0, 0.72, 0.16);
+    ball(bird, 0.15, cobalt, 0, 1.0, 0.24);
+    cone(bird, 0.05, 0.15, gold, 0, 1.0, 0.38).rotation.x = Math.PI / 2;
+    const oceanColors = ['#00bcd4', '#3f51b5', '#ffb300', '#43a047', '#8e24aa'];
+    for (let k = 0; k < 5; k++) {
+      const a = -0.65 + k * 0.325;
+      const feather = cyl(bird, 0.09, 0.18, 1.45, mat(oceanColors[k]), Math.sin(a) * 0.5, 0.95, -0.38 + Math.cos(a) * 0.18);
+      feather.rotation.z = -a;
+      ball(bird, 0.14, gold, Math.sin(a) * 1.05, 1.6, -0.38);
+    }
+    return bird;
+  }
+
+  function createCat(targetGroup, x, y, z) {
+    const cat = new THREE.Group();
+    cat.position.set(x, y, z);
+    targetGroup.add(cat);
+    const ginger = mat('#ff9800');
+    const whiteMat = mat('#ffffff');
+    torus(cat, 0.35, 0.2, ginger, 0, 0.2, 0).rotation.x = Math.PI / 2;
+    ball(cat, 0.24, ginger, 0.3, 0.28, 0.16);
+    ball(cat, 0.09, whiteMat, 0.16, 0.14, 0.38);
+    cone(cat, 0.07, 0.15, ginger, 0.24, 0.52, 0.22).rotation.z = -0.3;
+    cone(cat, 0.07, 0.15, ginger, 0.38, 0.52, 0.12).rotation.z = 0.3;
+    torus(cat, 0.45, 0.06, ginger, 0, 0.14, 0).rotation.x = Math.PI / 2;
+    return cat;
+  }
+
+  const mainLayout=ISLAND_LAYOUT[0];
  const center=new THREE.Group();
  center.position.set(mainLayout.x,mainLayout.elevation,mainLayout.z);
  center.userData.radius=mainLayout.radius;
@@ -200,6 +329,7 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
  bench(center,-rc*.62,3.2,0.4);
  bench(center,rc*.62,3.2,-0.4);
  bench(center,0,-rc*.7,Math.PI);
+  createOwl(center, rc*0.48, 5.8, rc*0.35);
  tree(center,-rc*.72,-rc*.35,1,1.5);
  tree(center,rc*.72,-rc*.35,0,1.5);
  tree(center,-rc*.68,rc*.45,2,1.4);
@@ -283,6 +413,7 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
  // Scenic Benches and Cherry Blossom Trees overlooking the ocean
  bench(personal, -rp*.58, 3.2, 0.4);
  bench(personal, rp*.58, 3.2, -0.4);
+  createCat(personal, 1.1, 2.05, -1.5);
  tree(personal, -rp*.72, -rp*.25, 2, 1.5);
  tree(personal, rp*.72, -rp*.25, 2, 1.5);
 
@@ -408,6 +539,8 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
      bench(g,3.5,4.2,0.5);
      tree(g,-5.5,-4.2,0,1.4);
      tree(g,5.5,-4.0,2,1.3);
+     createDog(g, 2.4, 1.65, -1.0);
+     createPigeon(g, 5.2, 2.2, 0.8);
    }
 
    // -------------------------------------------------------------
@@ -461,6 +594,7 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
      bench(g,-4.5,4.8,0.4);
      bench(g,4.5,4.8,-0.4);
      tree(g,5.6,-3.8,2,1.4);
+     createOwl(g, r*0.36, 6.7, 0);
    }
 
    // -------------------------------------------------------------
@@ -508,6 +642,7 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
      bench(g,4.5,4.2,0.5);
      tree(g,-5.6,-3.6,2,1.4);
      tree(g,5.6,-2.8,1,1.3);
+     createIbex(g, -3.2, 2.3, 0);
    }
 
    // -------------------------------------------------------------
@@ -546,6 +681,7 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
      bench(g,4.2,3.8,-0.5);
      tree(g,5.2,-4.2,0,1.4);
      tree(g,-5.2,-4.2,2,1.4);
+     createPeacock(g, 0, 0.45, 2.4);
    }
 
    // -------------------------------------------------------------
@@ -592,6 +728,7 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
      bench(g,4.5,4.2,-0.3);
      tree(g,5.6,-3.6,0,1.4);
      tree(g,-5.6,-3.6,1,1.4);
+     createDolphin(g, 0, -1.1, 8.5);
    }
 
    g.children.slice(landmarkStart).forEach(o=>o.traverse(m=>{if(m.isMesh)m.userData.building=data.courses[i].id;}));

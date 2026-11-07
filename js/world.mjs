@@ -1,12 +1,12 @@
 export const PSYCHOLOGY_ISLAND_LAYOUT = [
-  { id: 'center', x: 0, z: 0, radius: 18.5, elevation: 4.5 },
-  { id: 'island-personal', x: -4.0, z: -58.0, radius: 15.5, elevation: 4.0 },
-  { id: 'island-01', x: -46.0, z: -26.0, radius: 15.5, elevation: 2.8 },
-  { id: 'island-02', x: -50.0, z: 28.0, radius: 16.0, elevation: 2.2 },
-  { id: 'island-03', x: -12.0, z: 54.0, radius: 16.5, elevation: 4.0 },
-  { id: 'island-04', x: 38.0, z: 46.0, radius: 16.0, elevation: 3.0 },
-  { id: 'island-05', x: 56.0, z: 8.0, radius: 16.5, elevation: 2.6 },
-  { id: 'island-06', x: 42.0, z: -38.0, radius: 15.5, elevation: 4.6 }
+  { id: 'center', x: 0, z: 0, radius: 22.0, elevation: 4.8 },
+  { id: 'island-personal', x: -5.0, z: -78.0, radius: 19.0, elevation: 4.4 },
+  { id: 'island-01', x: -62.0, z: -35.0, radius: 19.0, elevation: 3.2 },
+  { id: 'island-02', x: -68.0, z: 38.0, radius: 20.0, elevation: 2.5 },
+  { id: 'island-03', x: -16.0, z: 76.0, radius: 20.5, elevation: 4.4 },
+  { id: 'island-04', x: 52.0, z: 62.0, radius: 20.0, elevation: 3.4 },
+  { id: 'island-05', x: 78.0, z: 12.0, radius: 21.0, elevation: 2.8 },
+  { id: 'island-06', x: 56.0, z: -52.0, radius: 19.5, elevation: 5.0 }
 ];
 
 export const BRIDGE_STYLES = [
