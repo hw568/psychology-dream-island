@@ -117,9 +117,32 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
  function tree(p,x,z,type=0,scale=1){
    const g=new THREE.Group();g.position.set(x,.25,z);g.scale.setScalar(scale);p.add(g);
    cyl(g,.15,.22,1.6,wood,0,.8);
-   if(type===1){cone(g,1.1,2.0,mat('#2e7d32'),0,2.1);cone(g,.85,1.7,mat('#43a047'),0,3.0);}
-   else if(type===2){ball(g,1.05,mat('#ec407a'),0,2.1,0);ball(g,.82,mat('#f48fb1'),.5,2.5,.1);}
-   else{ball(g,1.05,mat('#388e3c'),0,2.1,0);ball(g,.85,mat('#66bb6a'),.5,2.5,.1);}
+   if(type===1){
+     // Pine / Cypress (深綠松柏)
+     cone(g,1.1,2.0,mat('#2e7d32'),0,2.1);cone(g,.85,1.7,mat('#43a047'),0,3.0);cone(g,.60,1.4,mat('#66bb6a'),0,3.8);
+   } else if(type===2){
+     // Sakura / Pink Cherry Blossom (粉嫩櫻花)
+     ball(g,1.05,mat('#ec407a'),0,2.1,0);ball(g,.82,mat('#f48fb1'),.5,2.5,.1);ball(g,.75,mat('#ff80ab'),-.4,2.4,-.3);
+   } else if(type===3){
+     // Golden Ginkgo / Autumn Maple (金黃銀杏與紅楓)
+     ball(g,1.1,mat('#f59e0b'),0,2.1,0);ball(g,.85,mat('#fbbf24'),.4,2.5,.2);ball(g,.70,mat('#d97706'),-.4,2.3,-.2);
+   } else if(type===4){
+     // Wisteria / Fantasy Lavender (紫藤紫羅蘭)
+     ball(g,1.05,mat('#8b5cf6'),0,2.1,0);ball(g,.85,mat('#a78bfa'),.4,2.5,.1);ball(g,.75,mat('#c4b5fd'),-.4,2.3,-.3);
+   } else if(type===5){
+     // Tropical Palm (熱帶海島棕櫚樹)
+     const trunk=cyl(g,0.12,0.18,2.8,mat('#8d6e63'),0,1.4,0);
+     trunk.rotation.z=0.12;
+     for(let f=0;f<6;f++){
+       const a=f*Math.PI*2/6;
+       const frond=box(g,1.4,0.05,0.45,mat('#2e7d32'),Math.sin(a)*0.9,2.9,Math.cos(a)*0.9);
+       frond.rotation.y=a;
+       frond.rotation.z=-0.35;
+     }
+   } else {
+     // Deciduous lush green oak (經典翠綠大樹)
+     ball(g,1.05,mat('#388e3c'),0,2.1,0);ball(g,.85,mat('#66bb6a'),.5,2.5,.1);ball(g,.75,mat('#4caf50'),-.4,2.4,-.3);
+   }
  }
 
  function bench(p,x,z,angle=0){
@@ -127,6 +150,60 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
    box(g,1.8,.18,.55,wood,0,0,0);
    box(g,1.8,.65,.14,wood,0,.35,-.25);
    for(const dx of [-.65,.65]) box(g,.14,.75,.4,dark,dx,-.35,0);
+ }
+
+ // -------------------------------------------------------------
+ // 景物多樣化生成組件 (Diverse Island Scenery Builders)
+ // -------------------------------------------------------------
+ function lanternPost(p,x,z,lampColor='#ffd54f'){
+   const g=new THREE.Group();g.position.set(x,0.25,z);p.add(g);
+   cyl(g,0.18,0.22,0.45,dark,0,0.22,0);
+   cyl(g,0.08,0.10,2.6,dark,0,1.6,0);
+   torus(g,0.18,0.04,gold,0,2.8,0).rotation.x=Math.PI/2;
+   box(g,0.38,0.52,0.38,mat(lampColor,{emissive:lampColor,emissiveIntensity:0.6}),0,3.1,0);
+   cone(g,0.46,0.35,dark,0,3.55,0,4).rotation.y=Math.PI/4;
+ }
+
+ function fountain(p,x,z,r=2.2,waterColor='#38bdf8'){
+   const g=new THREE.Group();g.position.set(x,0.25,z);p.add(g);
+   cyl(g,r+0.32,r+0.42,0.6,cream,0,0.3,0,18);
+   cyl(g,r,r,0.5,mat(waterColor,{transparent:true,opacity:0.85}),0,0.42,0,18);
+   cyl(g,0.42,0.55,1.5,cream,0,1.05,0,12);
+   cyl(g,0.92,1.1,0.25,cream,0,1.8,0,16);
+   cyl(g,0.82,0.82,0.2,mat(waterColor,{transparent:true,opacity:0.88}),0,1.9,0,16);
+   ball(g,0.28,gold,0,2.15,0);
+   const plume=cone(g,0.24,0.7,mat('#ffffff',{transparent:true,opacity:0.8}),0,2.5,0);
+   animated.push({obj:plume,kind:'bell'});
+ }
+
+ function flowerBed(p,x,z,c1='#f43f5e',c2='#fbbf24',radius=1.3){
+   const g=new THREE.Group();g.position.set(x,0.28,z);p.add(g);
+   cyl(g,radius,radius*1.08,0.18,mat('#4d7c0f'),0,0.09,0,12);
+   for(let k=0;k<7;k++){
+     const a=k*Math.PI*2/7;
+     const fr=(k%2===0?0.65:0.35)*radius;
+     ball(g,0.18+(k%3)*0.04,mat(k%2===0?c1:c2),Math.sin(a)*fr,0.22,Math.cos(a)*fr);
+   }
+ }
+
+ function gazebo(p,x,z,r=2.4,roofCol='#6366f1',pillars=6){
+   const g=new THREE.Group();g.position.set(x,0.3,z);p.add(g);
+   cyl(g,r+0.35,r+0.45,0.45,cream,0,0.22,0,pillars);
+   for(let i=0;i<pillars;i++){
+     const a=i*Math.PI*2/pillars;
+     cyl(g,0.13,0.13,2.6,white,Math.sin(a)*r*0.85,1.6,Math.cos(a)*r*0.85);
+     ball(g,0.16,gold,Math.sin(a)*r*0.85,2.95,Math.cos(a)*r*0.85);
+   }
+   torus(g,r*0.88,0.12,cream,0,2.95,0,pillars);
+   cone(g,r+0.25,1.8,mat(roofCol),0,3.9,0,pillars);
+   ball(g,0.32,gold,0,4.9,0);
+ }
+
+ function obelisk(p,x,z,h=4.2,color='#e2d9cc',tip='#ffd700'){
+   const g=new THREE.Group();g.position.set(x,0.3,z);p.add(g);
+   box(g,1.25,0.5,1.25,cream,0,0.25,0);
+   cyl(g,0.42,0.55,h,mat(color),0,0.5+h/2,0,4).rotation.y=Math.PI/4;
+   cone(g,0.45,0.9,mat(tip),0,0.5+h+0.45,0,4).rotation.y=Math.PI/4;
  }
 
  const locations=new Map(),labels=[],buildingLabels=[],pickables=[],animated=[];
@@ -325,15 +402,43 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
  ball(psiGroup,.50,warm,0,2.6,0);
  animated.push({obj:psiGroup,kind:'halo'});
 
- // Statues, Benches and Trees in the vast Academic Promenade
+ // 1. Dual Obelisks of Reason at the grand radial entrance
+ obelisk(center, -rc*0.62, rc*0.48, 5.2, '#ede5d8', '#ffd700');
+ obelisk(center, rc*0.62, rc*0.48, 5.2, '#ede5d8', '#ffd700');
+
+ // 2. Twin Marble Reflection Fountains
+ fountain(center, -rc*0.46, -rc*0.32, 2.4, '#00b4d8');
+ fountain(center, rc*0.46, -rc*0.32, 2.4, '#00b4d8');
+
+ // 3. Classical Amphitheater Semicircular Steps overlooking the sea
+ for(let st=1; st<=3; st++){
+   const arch = torus(center, 4.5 + st * 1.1, 0.28, cream, 0, 0.4 + st * 0.26, rc * 0.52);
+   arch.rotation.x = Math.PI / 2;
+ }
+ cyl(center, 1.2, 1.4, 0.5, cream, 0, 0.6, rc * 0.52);
+ ball(center, 0.45, gold, 0, 1.1, rc * 0.52);
+
+ // 4. Botanical splendor: Rose beds, lavender clusters, golden ginkgo & wisteria trees
+ flowerBed(center, -rc*0.62, 0, '#e11d48', '#fbbf24', 2.2);
+ flowerBed(center, rc*0.62, 0, '#8b5cf6', '#38bdf8', 2.2);
+ flowerBed(center, 0, -rc*0.58, '#f43f5e', '#a855f7', 1.8);
+
+ // 5. Promenade Lantern Posts & Benches
+ lanternPost(center, -rc*0.50, rc*0.25);
+ lanternPost(center, rc*0.50, rc*0.25);
+ lanternPost(center, -rc*0.35, -rc*0.55);
+ lanternPost(center, rc*0.35, -rc*0.55);
+
  bench(center,-rc*.62,3.2,0.4);
  bench(center,rc*.62,3.2,-0.4);
  bench(center,0,-rc*.7,Math.PI);
-  createOwl(center, rc*0.48, 5.8, rc*0.35);
- tree(center,-rc*.72,-rc*.35,1,1.5);
- tree(center,rc*.72,-rc*.35,0,1.5);
- tree(center,-rc*.68,rc*.45,2,1.4);
- tree(center,rc*.68,rc*.45,0,1.4);
+ createOwl(center, rc*0.48, 5.8, rc*0.35);
+
+ tree(center,-rc*.72,-rc*.35,1,1.6);
+ tree(center,rc*.72,-rc*.35,3,1.6);
+ tree(center,-rc*.68,rc*.45,2,1.5);
+ tree(center,rc*.68,rc*.45,4,1.5);
+ tree(center,0,rc*.72,0,1.5);
 
  center.children.slice(centerLandmarkStart).forEach(o=>o.traverse(m=>{if(m.isMesh)m.userData.building='center';}));
 
@@ -410,12 +515,39 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
  box(guideGroup, .36, .48, .1, mat('#ffe082'), -.36, .95, .24);
  guideGroup.userData.resident = 'guide-sisi';
 
- // Scenic Benches and Cherry Blossom Trees overlooking the ocean
+ // 1. Astronomical Stargazing Telescope on Rotating Platform
+ const scopeGroup = new THREE.Group();
+ scopeGroup.position.set(-rp * 0.42, 1.35, rp * 0.45);
+ personal.add(scopeGroup);
+ cyl(scopeGroup, 1.2, 1.4, 0.35, cream, 0, 0.18, 0);
+ cyl(scopeGroup, 0.08, 0.08, 1.8, dark, -0.3, 1.0, -0.2);
+ cyl(scopeGroup, 0.08, 0.08, 1.8, dark, 0.3, 1.0, -0.2);
+ cyl(scopeGroup, 0.08, 0.08, 1.8, dark, 0, 1.0, 0.35);
+ const scopeTube = cyl(scopeGroup, 0.22, 0.28, 2.6, gold, 0, 1.9, 0);
+ scopeTube.rotation.x = -Math.PI / 4;
+ scopeTube.rotation.z = Math.PI / 8;
+ ball(scopeGroup, 0.32, mat('#80deea', { emissive: '#00e5ff', emissiveIntensity: 0.6 }), 0, 2.7, -0.9);
+
+ // 2. Luminous Lotus & Crystal Reflection Fountain
+ fountain(personal, rp * 0.48, rp * 0.35, 2.4, '#b388ff');
+
+ // 3. Romantic Starlight Gazebo
+ gazebo(personal, -rp * 0.55, -rp * 0.30, 2.5, '#4a148c', 6);
+
+ // 4. Botanical splendor: Pink Sakura, Lavender Wisteria, Golden Ginkgo & Flowerbeds
+ flowerBed(personal, -rp * 0.40, rp * 0.20, '#f472b6', '#c084fc', 1.8);
+ flowerBed(personal, rp * 0.40, -rp * 0.20, '#fbbf24', '#f43f5e', 1.8);
+ lanternPost(personal, -rp * 0.48, 0, '#c084fc');
+ lanternPost(personal, rp * 0.48, 0, '#c084fc');
+
  bench(personal, -rp*.58, 3.2, 0.4);
  bench(personal, rp*.58, 3.2, -0.4);
-  createCat(personal, 1.1, 2.05, -1.5);
- tree(personal, -rp*.72, -rp*.25, 2, 1.5);
- tree(personal, rp*.72, -rp*.25, 2, 1.5);
+ createCat(personal, 1.1, 2.05, -1.5);
+
+ tree(personal, -rp*.72, -rp*.25, 2, 1.6);
+ tree(personal, rp*.72, -rp*.25, 4, 1.6);
+ tree(personal, 0, -rp*.68, 3, 1.5);
+ tree(personal, -rp*.62, rp*.48, 2, 1.4);
 
  personal.children.slice(personalLandmarkStart).forEach(o => o.traverse(m => {
    if (m.isMesh) m.userData.building = 'island-personal';
@@ -487,12 +619,32 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
        box(g,1.2,.35+s*.18,1.2,cream,Math.sin(sa)*5.2,.6+s*.14,Math.cos(sa)*5.2);
      }
 
-     // Decorative streetlamps, benches & flowering trees
+     // 6. Giant Newton Light Dispersion Prism with Arc of 7 Rainbow Crystal Pillars
+     const prism = cyl(g, 1.4, 1.4, 3.2, mat('#80deea', { transparent: true, opacity: 0.78 }), -r*0.48, 1.8, -r*0.28, 3);
+     prism.rotation.y = Math.PI / 6;
+     const rainbowCols = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#8b5cf6'];
+     for (let k = 0; k < 7; k++) {
+       const a = -0.7 + k * 0.24;
+       const rx = -r*0.48 + Math.sin(a) * 4.8, rz = -r*0.28 + Math.cos(a) * 4.8;
+       cyl(g, 0.28, 0.36, 1.6 + (k % 3) * 0.4, mat(rainbowCols[k], { emissive: rainbowCols[k], emissiveIntensity: 0.45 }), rx, 1.2, rz, 6);
+       ball(g, 0.24, warm, rx, 2.2 + (k % 3) * 0.4, rz);
+     }
+
+     // 7. Ames Room Forced-Perspective Pavilion
+     gazebo(g, r*0.50, -r*0.30, 2.6, '#0288d1', 6);
+
+     // 8. Optical Flowerbeds & Sensory Lanterns
+     flowerBed(g, -r*0.42, r*0.38, '#06b6d4', '#fbbf24', 2.0);
+     flowerBed(g, r*0.42, r*0.38, '#ef4444', '#a855f7', 2.0);
+     lanternPost(g, -r*0.50, 0, '#00e5ff');
+     lanternPost(g, r*0.50, 0, '#00e5ff');
+
      bench(g,-4.5,4.2,0.3);
      bench(g,4.5,4.2,-0.3);
-     tree(g,5.5,-3.6,1,1.4);
-     tree(g,-5.5,-3.5,0,1.4);
-     tree(g,0,-5.8,2,1.3);
+     tree(g,5.5,-3.6,5,1.5);
+     tree(g,-5.5,-3.5,2,1.4);
+     tree(g,0,-5.8,0,1.4);
+     tree(g,r*0.62,r*0.25,5,1.4);
    }
 
    // -------------------------------------------------------------
@@ -535,10 +687,31 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
      cyl(skinner,.10,.10,.9,gold,0,.9,0);
      ball(skinner,.24,mat('#76ff03',{emissive:'#76ff03',emissiveIntensity:.6}),0,1.5,0);
 
+     // 6. Roman Labyrinth Hedge Maze (記憶宮殿綠色迷宮樹籬)
+     for (let a = 0; a < 8; a++) {
+       const ang = a * Math.PI * 2 / 8;
+       const hx = Math.sin(ang) * (r * 0.52), hz = Math.cos(ang) * (r * 0.52);
+       box(g, 2.8, 1.4, 0.65, mat('#2e7d32'), hx, 1.0, hz).rotation.y = ang;
+       if (a % 2 === 0) ball(g, 0.35, cream, hx, 2.0, hz);
+     }
+
+     // 7. Cascading Forgetting-Curve Waterfall Fountain
+     fountain(g, -r*0.48, r*0.36, 2.5, '#00b4d8');
+
+     // 8. Rotunda Library of Alexandria Reading Pavilion
+     gazebo(g, r*0.50, r*0.32, 2.6, '#d97706', 8);
+
+     // 9. Italian Cypress Groves, Autumn Ginkgo & Ancient Lanterns
+     flowerBed(g, 0, -r*0.62, '#f59e0b', '#dc2626', 2.0);
+     lanternPost(g, -r*0.48, 0, '#ffd54f');
+     lanternPost(g, r*0.48, 0, '#ffd54f');
+
      bench(g,-3.5,4.2,-0.5);
      bench(g,3.5,4.2,0.5);
-     tree(g,-5.5,-4.2,0,1.4);
-     tree(g,5.5,-4.0,2,1.3);
+     tree(g,-r*0.65,0,1,1.7);
+     tree(g,r*0.65,0,1,1.7);
+     tree(g,-5.5,-4.2,3,1.6);
+     tree(g,5.5,-4.0,2,1.4);
      createDog(g, 2.4, 1.65, -1.0);
      createPigeon(g, 5.2, 2.2, 0.8);
    }
@@ -586,14 +759,44 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
      cyl(g,.04,.04,2.4,dark,-2.8,5.2,3.6); ball(g,.95,mat('#ff5252'),-2.8,4.2,3.6);
      cyl(g,.04,.04,2.4,dark,2.8,5.2,3.6); box(g,1.3,1.3,1.3,mat('#448aff'),2.8,4.2,3.6);
 
-     // 5. Rational Chessboard Tiles
-     box(g, 4.2, .1, 4.2, cream, 0, .45, 0);
-     cyl(g, .45, .6, 1.4, dark, -1.2, 1.1, -1.2); // Chess King piece
-     cyl(g, .38, .5, 1.2, white, 1.2, 1.0, 1.2);  // Chess Queen piece
+     // 5. Expanded Life-Sized Royal Chessboard Garden
+     box(g, 7.8, 0.28, 7.8, cream, 0, 0.45, r*0.42);
+     cyl(g, 0.55, 0.70, 1.8, dark, -2.4, 1.4, r*0.42 - 2.4); // King
+     cyl(g, 0.48, 0.62, 1.6, white, 2.4, 1.3, r*0.42 + 2.4); // Queen
+     cyl(g, 0.40, 0.52, 1.4, dark, -1.2, 1.2, r*0.42 + 1.2); // Rook
+     cone(g, 0.45, 1.4, white, 1.2, 1.2, r*0.42 - 1.2, 4);   // Bishop
+
+     // 6. Heuristic Windmill with 4 Rotating Cross-Blades
+     const windmill = new THREE.Group();
+     windmill.position.set(-r*0.50, 0.3, -r*0.35);
+     g.add(windmill);
+     cyl(windmill, 1.8, 2.4, 5.5, cream, 0, 2.75, 0, 8);
+     cone(windmill, 2.0, 1.8, mat('#e65100'), 0, 6.4, 0, 8);
+     const blades = new THREE.Group();
+     blades.position.set(0, 5.2, 1.9);
+     windmill.add(blades);
+     for(let bl=0; bl<4; bl++){
+       const bRot = bl * Math.PI / 2;
+       const bMesh = box(blades, 0.35, 3.8, 0.08, wood, Math.sin(bRot) * 1.9, Math.cos(bRot) * 1.9, 0);
+       bMesh.rotation.z = -bRot;
+     }
+     animated.push({ obj: blades, kind: 'gear' });
+
+     // 7. The Eureka Insight Flame Monument
+     cyl(g, 0.9, 1.2, 1.2, rock, r*0.50, 0.9, -r*0.30);
+     const flame = ball(g, 0.75, warm, r*0.50, 1.8, -r*0.30);
+     animated.push({ obj: flame, kind: 'bell' });
+
+     // 8. Dual Process Lanterns & Flowerbeds
+     flowerBed(g, -r*0.38, 0, '#ef4444', '#fbbf24', 1.8);
+     flowerBed(g, r*0.38, 0, '#3b82f6', '#80deea', 1.8);
+     lanternPost(g, -r*0.40, r*0.22, '#ef4444');
+     lanternPost(g, r*0.40, r*0.22, '#3b82f6');
 
      bench(g,-4.5,4.8,0.4);
      bench(g,4.5,4.8,-0.4);
-     tree(g,5.6,-3.8,2,1.4);
+     tree(g,5.6,-3.8,1,1.5);
+     tree(g,-r*0.62,r*0.25,3,1.5);
      createOwl(g, r*0.36, 6.7, 0);
    }
 
@@ -638,10 +841,30 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
      cyl(g, .45, .6, 6.2, mat('#d81b60'), 4.8, 3.6, -3.2);
      ball(g, .75, warm, 4.8, 6.8, -3.2);
 
+     // 5. Sun & Moon Circadian Rhythm Pavilion
+     gazebo(g, -r*0.52, r*0.38, 2.6, '#e11d48', 6);
+
+     // 6. Tethered Hot Air Balloon Ascent Station
+     const balloonGroup = new THREE.Group();
+     balloonGroup.position.set(r*0.52, 0.3, -r*0.35);
+     g.add(balloonGroup);
+     cyl(balloonGroup, 2.2, 2.4, 0.45, wood, 0, 0.22, 0);
+     cyl(balloonGroup, 0.75, 0.65, 0.8, mat('#795548'), 0, 1.2, 0);
+     for(const rx of [-0.6, 0.6]) for(const rz of [-0.6, 0.6]) cyl(balloonGroup, 0.03, 0.03, 2.2, dark, rx, 2.2, rz);
+     ball(balloonGroup, 2.6, mat('#ff9800'), 0, 4.8, 0);
+     torus(balloonGroup, 2.5, 0.18, warm, 0, 4.8, 0);
+     animated.push({ obj: balloonGroup, kind: 'boat', base: 0.3 });
+
+     // 7. Autumn Maple & Golden Ginkgo Mountain Forest
+     flowerBed(g, r*0.45, r*0.38, '#ef4444', '#fbbf24', 2.2);
+     lanternPost(g, -r*0.45, 0, '#f97316');
+     lanternPost(g, r*0.45, 0, '#f97316');
+
      bench(g,-4.5,4.2,-0.5);
      bench(g,4.5,4.2,0.5);
-     tree(g,-5.6,-3.6,2,1.4);
-     tree(g,5.6,-2.8,1,1.3);
+     tree(g,-5.6,-3.6,3,1.6);
+     tree(g,5.6,-2.8,3,1.6);
+     tree(g,-r*0.62,-r*0.25,2,1.5);
      createIbex(g, -3.2, 2.3, 0);
    }
 
@@ -677,10 +900,30 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
      // 4. Circular Topiary Garden Plaza
      torus(g, 4.2, .24, cream, 0, .45, 0);
 
+     // 5. Freudian Subconscious Iceberg Lake
+     const lakeGroup = new THREE.Group();
+     lakeGroup.position.set(0, 0.35, r*0.45);
+     g.add(lakeGroup);
+     cyl(lakeGroup, 3.6, 3.8, 0.4, cream, 0, 0.2, 0, 18);
+     cyl(lakeGroup, 3.3, 3.3, 0.35, mat('#00b4d8', { transparent: true, opacity: 0.85 }), 0, 0.32, 0, 18);
+     const iceTip = cone(lakeGroup, 1.4, 2.8, mat('#e0f7fa', { transparent: true, opacity: 0.92 }), 0, 1.6, 0, 6);
+     animated.push({ obj: iceTip, kind: 'boat', base: 1.6 });
+
+     // 6. Greek Drama Comedy & Tragedy Masks Pavilion
+     gazebo(g, -r*0.52, -r*0.32, 2.5, '#7e22ce', 6);
+
+     // 7. Five Domain Thematic Flowerbeds & Topiaries
+     flowerBed(g, r*0.45, 0, '#f59e0b', '#fbbf24', 2.0);
+     flowerBed(g, -r*0.45, 0, '#8b5cf6', '#a78bfa', 2.0);
+     flowerBed(g, 0, -r*0.55, '#f43f5e', '#ec4899', 2.0);
+     lanternPost(g, -r*0.45, r*0.25, '#c084fc');
+     lanternPost(g, r*0.45, r*0.25, '#c084fc');
+
      bench(g,-4.2,3.8,0.5);
      bench(g,4.2,3.8,-0.5);
-     tree(g,5.2,-4.2,0,1.4);
-     tree(g,-5.2,-4.2,2,1.4);
+     tree(g,5.2,-4.2,4,1.6);
+     tree(g,-5.2,-4.2,2,1.5);
+     tree(g,r*0.62,-r*0.25,3,1.5);
      createPeacock(g, 0, 0.45, 2.4);
    }
 
@@ -724,10 +967,46 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
      cyl(g, .15, .15, 3.6, wood, 5.2, 2.2, 0);
      ball(g, .35, warm, 5.2, 4.1, 0);
 
+     // 6. The Athenian Democratic Forum Rostrum
+     const rostrumGroup = new THREE.Group();
+     rostrumGroup.position.set(0, 0.35, -r*0.48);
+     g.add(rostrumGroup);
+     cyl(rostrumGroup, 3.2, 3.6, 0.45, cream, 0, 0.22, 0, 12);
+     cyl(rostrumGroup, 0.65, 0.8, 1.4, cream, 0, 1.0, 0);
+     ball(rostrumGroup, 0.32, gold, 0, 1.75, 0);
+
+     // 7. Social Network Theory Sociogram Sculpture
+     const netGroup = new THREE.Group();
+     netGroup.position.set(r*0.50, 0.35, -r*0.32);
+     g.add(netGroup);
+     cyl(netGroup, 1.2, 1.4, 0.35, cream, 0, 0.18, 0);
+     cyl(netGroup, 0.1, 0.1, 3.2, gold, 0, 1.8, 0);
+     const netNodes = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
+     for(let n=0; n<5; n++){
+       const na = n * Math.PI * 2 / 5;
+       const nx = Math.sin(na) * 1.4, nz = Math.cos(na) * 1.4;
+       cyl(netGroup, 0.04, 0.04, 1.5, gold, nx/2, 2.6, nz/2).rotation.x = Math.PI / 4;
+       ball(netGroup, 0.28, mat(netNodes[n], { emissive: netNodes[n], emissiveIntensity: 0.5 }), nx, 3.2, nz);
+     }
+
+     // 8. Agora Market Festival Canopies
+     const stall1 = box(g, 2.6, 2.2, 1.6, wood, -r*0.48, 1.4, r*0.35);
+     cone(g, 1.8, 0.9, mat('#e11d48'), -r*0.48, 2.8, r*0.35, 4).rotation.y = Math.PI / 4;
+     const stall2 = box(g, 2.6, 2.2, 1.6, wood, r*0.48, 1.4, r*0.35);
+     cone(g, 1.8, 0.9, mat('#0288d1'), r*0.48, 2.8, r*0.35, 4).rotation.y = Math.PI / 4;
+
+     // 9. Mediterranean Olive, Cypress Groves & Festival Flowerbeds
+     flowerBed(g, -r*0.42, 0, '#ec4899', '#f59e0b', 2.0);
+     flowerBed(g, r*0.42, 0, '#14b8a6', '#f43f5e', 2.0);
+     lanternPost(g, -r*0.46, -r*0.25, '#ffd54f');
+     lanternPost(g, r*0.46, -r*0.25, '#ffd54f');
+
      bench(g,-4.5,4.2,0.3);
      bench(g,4.5,4.2,-0.3);
-     tree(g,5.6,-3.6,0,1.4);
-     tree(g,-5.6,-3.6,1,1.4);
+     tree(g,5.6,-3.6,1,1.6);
+     tree(g,-5.6,-3.6,0,1.6);
+     tree(g,-r*0.65,r*0.25,2,1.5);
+     tree(g,r*0.65,r*0.25,3,1.5);
      createDolphin(g, 0, -1.1, 8.5);
    }
 
