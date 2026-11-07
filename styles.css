@@ -20,7 +20,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .building-label{position:relative;pointer-events:auto;min-height:44px;width:78px;background:transparent;border:0;padding:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#21584d}.building-label>span{padding:7px 12px;border:1px solid #7da99b;border-radius:18px;background:#fffdf1ed;box-shadow:0 3px 12px #254c4d22}.building-label:hover{background:transparent;box-shadow:none}.building-label:hover>span{background:#e5f4e9}.map-heading.focused p{font-family:"LXGW WenKai TC","DFKai-SB",serif;font-size:27px;font-weight:800;margin-bottom:4px}#focus-hint{font-size:11px;line-height:1.8;color:#294b4c;max-width:350px}html[data-theme=night] #focus-hint{color:#e7edf0}@media(max-width:650px){.map-heading.focused p{font-size:23px}.map-heading.focused .eyebrow{font-size:8px}#focus-hint{font-size:9px;max-width:300px}}
 .header{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:20px}.header-host{display:flex;align-items:center;justify-self:center;gap:10px;max-width:570px;min-width:0;cursor:default}.header-host img{width:44px;height:54px;object-fit:contain;flex-shrink:0}.host-description{font-size:12px;line-height:1.65;margin:0;color:var(--ink)}.host-description small{font-size:10px;color:var(--muted);line-height:1.6;margin-top:3px}.header-actions{justify-self:end}@media(min-width:651px) and (max-width:1050px){.header{gap:14px}.host-description{font-size:11px}.header-host{gap:7px}.header-host img{width:36px;height:46px}.host-description small{font-size:9px}}@media(max-width:650px){.header{height:auto;min-height:72px;padding:12px 15px;grid-template-columns:minmax(0,1fr) 44px;gap:5px 10px}.brand{grid-column:1;grid-row:1}.header-actions{grid-column:2;grid-row:1}.header-host{grid-column:1 / -1;grid-row:2;justify-self:stretch;max-width:none;gap:9px;padding:4px 0 1px}.header-host img{width:36px;height:44px}.host-description{font-size:11px;line-height:1.65}.host-description small{font-size:9px;margin-top:1px}}
 @media(max-width:650px){.overview{bottom:64px}}
-:root{--bg:#fff4e3;--surface:#fffaf2;--ink:#392d4b;--muted:#6e6177;--line:#e2d2d6;--primary:#6b4d84;--primary-text:#654578;--accent:#ed9d50;--accent-text:#984719;--water:#d7d0e7}html[data-theme=mist]{--bg:#efe7f6;--surface:#fbf8fe;--ink:#392d4b;--muted:#6c5c78;--line:#d8c9e1;--primary:#6b4d84;--primary-text:#654578;--accent:#ed9d50;--accent-text:#984719;--water:#c8bddc}html[data-theme=night]{--bg:#231d36;--surface:#332a48;--ink:#fff3dc;--muted:#d4c4df;--line:#655673;--primary:#d6b5ef;--primary-text:#e0bff6;--accent:#ffc479;--accent-text:#ffd399;--water:#33284f}.island-label{background:#fff8edf5;color:#493756;border-color:#c7b6ce}.island-label b{color:#a64e1b}.island-label.selected{background:#6b4d84;color:#fff}.island-label.selected b{color:#ffe0a2}.island-label.center{border-color:#bd8755}.building-label{color:#573a6e}.building-label>span{border-color:#b699c7;background:#fff8efed}.building-label:hover>span{background:#f0e1f6}.person-label{color:#4a395c}.person-label>span{border-color:#baa6c7;background:#fff8edf5}.person-label>span::after{border-top-color:#baa6c7}.person-label.island-host>span{background:#ffe9c7;border-color:#b27a43;color:#75431e}.map-heading p,.map-heading .eyebrow,#focus-hint{color:#493756}.map-coordinate{color:#655572}html[data-theme=night] .map-heading p,html[data-theme=night] .map-heading .eyebrow,html[data-theme=night] #focus-hint,html[data-theme=night] .map-coordinate{color:#f2e2f4}.progress-track span{background:#d98743}.entry-symbol{color:#b86a30}#resident-avatar{background:#eadcf0;color:#684779}.header-host .host-description{color:var(--ink)}.center-entry:hover{border-color:#bca1cc}.rail{background-image:radial-gradient(circle at 95% 5%,#c9acd519,transparent 30%),radial-gradient(circle at 5% 42%,#efaf6714,transparent 32%)}html[data-theme=night] .rail{background-image:radial-gradient(circle at 95% 5%,#b191d01a,transparent 33%)}
+:root{--bg:#f4f9fc;--surface:#ffffff;--ink:#262035;--muted:#5f566e;--line:#dfd8e8;--primary:#6b468f;--primary-text:#5a337e;--accent:#e67e22;--accent-text:#b85408;--water:#5ebbdc}html[data-theme=mist]{--bg:#f2eef8;--surface:#fcfaff;--ink:#2f2540;--muted:#695c7e;--line:#ded3e8;--primary:#6b468f;--primary-text:#5a337e;--accent:#e67e22;--accent-text:#b85408;--water:#8cb9dc}html[data-theme=night]{--bg:#141b36;--surface:#1e2645;--ink:#f8fafc;--muted:#94a3b8;--line:#334155;--primary:#c084fc;--primary-text:#d8b4fe;--accent:#fbbf24;--accent-text:#fde047;--water:#1e2952}.island-label{background:#fff8edf5;color:#493756;border-color:#c7b6ce}.island-label b{color:#a64e1b}.island-label.selected{background:#6b4d84;color:#fff}.island-label.selected b{color:#ffe0a2}.island-label.center{border-color:#bd8755}.building-label{color:#573a6e}.building-label>span{border-color:#b699c7;background:#fff8efed}.building-label:hover>span{background:#f0e1f6}.person-label{color:#4a395c}.person-label>span{border-color:#baa6c7;background:#fff8edf5}.person-label>span::after{border-top-color:#baa6c7}.person-label.island-host>span{background:#ffe9c7;border-color:#b27a43;color:#75431e}.map-heading p,.map-heading .eyebrow,#focus-hint{color:#493756}.map-coordinate{color:#655572}html[data-theme=night] .map-heading p,html[data-theme=night] .map-heading .eyebrow,html[data-theme=night] #focus-hint,html[data-theme=night] .map-coordinate{color:#f2e2f4}.progress-track span{background:#d98743}.entry-symbol{color:#b86a30}#resident-avatar{background:#eadcf0;color:#684779}.header-host .host-description{color:var(--ink)}.center-entry:hover{border-color:#bca1cc}.rail{background-image:radial-gradient(circle at 95% 5%,#c9acd519,transparent 30%),radial-gradient(circle at 5% 42%,#efaf6714,transparent 32%)}html[data-theme=night] .rail{background-image:radial-gradient(circle at 95% 5%,#b191d01a,transparent 33%)}
 
 .music-volume{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink);min-height:44px}.music-volume input{width:84px;min-height:44px;margin:0;accent-color:var(--primary)}.music-volume output{min-width:32px;font-variant-numeric:tabular-nums}
 
@@ -744,4 +744,48 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 }
 dialog[open] {
   animation: dialogPopIn 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+
+/* ========================================================= */
+/* Philosopher Boat Floating Name Badges                     */
+/* ========================================================= */
+.philosopher-boat-tag {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1.5px solid #d4a373;
+  border-radius: 16px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #3e2723;
+  box-shadow: 0 4px 12px rgba(62, 39, 35, 0.22);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  pointer-events: auto;
+  transition: transform 0.15s, background 0.15s, border-color 0.15s;
+}
+.philosopher-boat-tag:hover {
+  background: #fff8e7;
+  border-color: #e76f51;
+  transform: translateY(-2px) scale(1.06);
+  box-shadow: 0 6px 16px rgba(231, 111, 81, 0.35);
+}
+.philosopher-boat-tag .boat-icon {
+  font-size: 12px;
+}
+.philosopher-boat-tag .boat-name {
+  letter-spacing: 0.3px;
+}
+html[data-theme=night] .philosopher-boat-tag {
+  background: rgba(30, 27, 75, 0.92);
+  border-color: #ffd700;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(255, 215, 0, 0.3);
+}
+html[data-theme=night] .philosopher-boat-tag:hover {
+  background: rgba(45, 40, 100, 0.95);
+  border-color: #ffe066;
 }

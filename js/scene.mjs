@@ -146,6 +146,12 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
  const depthC=mainLayout.elevation+1.5;
  const rc=mainLayout.radius;
  // Tier 1 (Base): Broad lawn ring (R=rc)
+ // Vibrant shallow water turquoise lagoon and beach rim
+ const lagoonMat = mat('#48cae4', { transparent: true, opacity: 0.45, depthWrite: false });
+ const sandMat = mat('#faebd7');
+ mesh(center, new THREE.RingGeometry(rc * 0.96, rc * 1.30, 32), lagoonMat, 0, -1.2, 0).rotation.x = -Math.PI / 2;
+ cyl(center, rc * 1.01, rc * 1.05, 0.22, sandMat, 0, -0.05, 0, 16);
+
  cyl(center,rc*.96,rc*1.04,depthC,rock,0,.2-depthC/2,0,16);
  cyl(center,rc*.98,rc*.98,.25,orange,0,.14,0,16);
  center.userData.land=cyl(center,rc*.96,rc*.97,.22,grass,0,.35,0,16);
@@ -217,6 +223,10 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
  const rp = personalLayout.radius;
  const personalLandmarkStart = personal.children.length;
 
+ // Vibrant shallow water celestial lagoon
+ mesh(personal, new THREE.RingGeometry(rp * 0.95, rp * 1.28, 32), mat('#b388ff', { transparent: true, opacity: 0.38, depthWrite: false }), 0, -1.2, 0).rotation.x = -Math.PI / 2;
+ cyl(personal, rp * 1.01, rp * 1.04, 0.20, mat('#f3e5f5'), 0, -0.05, 0, 16);
+
  // Tier 1: Floating Amethyst & Celestial Stone Foundation
  cyl(personal, rp*.95, rp*1.05, depthP, mat('#2d203a'), 0, .2 - depthP / 2, 0, 16);
  cyl(personal, rp*.98, rp*.98, .22, gold, 0, .14, 0, 16);
@@ -284,6 +294,7 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
  // 2. SIX ENLARGED COURSE ISLANDS WITH HIGH IDIOSYNCRATIC GEOMETRIES
  // =========================================================================
  const accents=[mat('#00b4d8'),mat('#ffb703'),mat('#3a86ff'),mat('#e63946'),mat('#8338ec'),mat('#fb5607')];
+ const islandLagoonMat = mat('#38bdf8', { transparent: true, opacity: 0.42, depthWrite: false });
 
  for(let i=0; i<data.courses.length; i++){
    const layout=ISLAND_LAYOUT.find(n => n.id === data.courses[i].id) || ISLAND_LAYOUT[i+2];
@@ -297,6 +308,10 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
    scene.add(g);
    locations.set(data.courses[i].id,g);
 
+   // Tropical shallow lagoon and beach rim around every island
+   mesh(g, new THREE.RingGeometry(r * 0.95, r * 1.28, 32), islandLagoonMat, 0, -1.2, 0).rotation.x = -Math.PI / 2;
+   cyl(g, r * 1.01, r * 1.04, 0.20, mat('#fef3c7'), 0, -0.05, 0, 16);
+
    const depth=elev+1.45;
    const landmarkStart=g.children.length;
 
@@ -309,31 +324,44 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
      cyl(g,r,r,.25,accents[0],0,.14,0,6);
      g.userData.land=cyl(g,r*.96,r*.98,.22,grass,0,.35,0,6);
 
-     // Emergent Quartz Crystal Clusters along the perimeter cliffs
+     // 1. Grand Prismatic Crystal Observatory Dome (Centerpiece)
+     cyl(g, 4.2, 4.8, 2.8, cream, 0, 1.8, 0, 8);
+     cyl(g, 3.6, 3.6, 3.2, mat('#80deea', { transparent: true, opacity: 0.82 }), 0, 4.2, 0, 8);
+     cone(g, 4.6, 2.8, mat('#0288d1'), 0, 6.8, 0, 8);
+     const obsHalo = torus(g, 4.8, 0.16, gold, 0, 7.2, 0);
+     animated.push({ obj: obsHalo, kind: 'halo' });
+
+     // 2. Emergent Quartz Crystal Clusters along all 6 star points (Height 4-6m)
      for(let k=0; k<6; k++){
        const a=k*Math.PI/3;
-       const cx=Math.sin(a)*r*0.82, cz=Math.cos(a)*r*0.82;
-       const crystal=mesh(g,new THREE.OctahedronGeometry(1.6,0),mat('#80deea',{transparent:true,opacity:.85}),cx,.9,cz);
-       crystal.scale.set(0.7,1.8,0.7);
+       const cx=Math.sin(a)*r*0.78, cz=Math.cos(a)*r*0.78;
+       const crystal=mesh(g,new THREE.OctahedronGeometry(2.2,0),mat('#26c6da',{transparent:true,opacity:.88}),cx,1.8,cz);
+       crystal.scale.set(0.65,2.4,0.65);
+       cyl(g, 0.6, 0.8, 1.2, rock, cx, 0.8, cz);
      }
-     // Optical Rubin's Vase Colonnade Archway
-     box(g,.8,5.5,.8,mat('#3f51b5'),-2.2,3.1,0);
-     box(g,.8,5.5,.8,mat('#3f51b5'),2.2,3.1,0);
-     box(g,5.2,.6,1.0,mat('#00e5ff'),0,5.8,0);
 
-     // Hovering Necker Cube Optical Illusion
-     const necker=mesh(g,new THREE.BoxGeometry(2.2,2.2,2.2),mat('#00e5ff',{wireframe:true}),0,3.6,0);
+     // 3. Optical Rubin's Vase Colonnade Archway
+     box(g,1.2,6.5,1.2,mat('#303f9f'),-3.6,3.6,0);
+     box(g,1.2,6.5,1.2,mat('#303f9f'),3.6,3.6,0);
+     box(g,8.4,.8,1.4,mat('#00e5ff'),0,7.1,0);
+
+     // 4. Hovering Necker Cube Optical Illusion with glowing core
+     const necker=mesh(g,new THREE.BoxGeometry(2.8,2.8,2.8),mat('#00e5ff',{wireframe:true}),0,4.6,0);
      animated.push({obj:necker,kind:'halo'});
-     ball(g,.5,warm,0,3.6,0);
+     ball(g,.75,warm,0,4.6,0);
 
-     // Penrose Impossible Stairs Ring
-     for(let s=0; s<8; s++){
-       const sa=s*Math.PI*2/8;
-       box(g,.9,.3+s*.16,.9,cream,Math.sin(sa)*3.2,.6+s*.12,Math.cos(sa)*3.2);
+     // 5. Penrose Impossible Stairs Ring
+     for(let s=0; s<10; s++){
+       const sa=s*Math.PI*2/10;
+       box(g,1.2,.35+s*.18,1.2,cream,Math.sin(sa)*5.2,.6+s*.14,Math.cos(sa)*5.2);
      }
-     bench(g,-3.5,3.2,0.3);
-     tree(g,4.2,-2.8,1,1.1);
-     tree(g,-4.5,-2.5,0,1.1);
+
+     // Decorative streetlamps, benches & flowering trees
+     bench(g,-4.5,4.2,0.3);
+     bench(g,4.5,4.2,-0.3);
+     tree(g,5.5,-3.6,1,1.4);
+     tree(g,-5.5,-3.5,0,1.4);
+     tree(g,0,-5.8,2,1.3);
    }
 
    // -------------------------------------------------------------
@@ -341,38 +369,45 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
    // Multi-tiered fortress with amphitheater steps & Pavlov belfry
    // -------------------------------------------------------------
    else if(i===1){
-     // Multi-tiered stone terraces (Citadel walls)
      cyl(g,r*.95,r*1.1,depth,rock,0,.2-depth/2,0,12);
      cyl(g,r,r,.25,accents[1],0,.14,0,12);
      g.userData.land=cyl(g,r*.96,r*.98,.22,grass,0,.35,0,12);
 
-     // Upper Citadel Terrace
-     box(g,r*1.1,1.0,r*0.85,cream,0,1.0,-1.2);
-     cyl(g,r*0.48,r*0.48,.18,mat('#e0d6c3'),0,1.55,-1.2);
+     // 1. Grand Roman Memory Palace Terrace & Fortress Walls
+     box(g,r*0.95,1.2,r*0.75,cream,0,1.0,-1.0);
+     cyl(g,r*0.45,r*0.48,.25,mat('#dfd4be'),0,1.65,-1.0);
 
-     // Pavlov Bell Tower
-     const belfry=box(g,3.8,2.8,3.4,cream,0,2.8,-1.2);
-     for(const sx of [-1,1]) for(const sz of [-1,1]) cyl(belfry,.24,.24,3.5,gold,sx*1.4,2.2,sz*1.2);
-     const belfryRoof=cone(belfry,2.8,2.0,mat('#ff8f00'),0,5.0,0,4);
+     // 2. Colossal Pavlov Bell Tower (8.8m Tall Citadel Belfry)
+     const belfry=box(g,4.8,3.6,4.2,cream,0,3.2,-1.0);
+     for(const sx of [-1,1]) for(const sz of [-1,1]) cyl(belfry,.32,.32,4.4,gold,sx*1.8,2.8,sz*1.6);
+     const belfryRoof=cone(belfry,3.6,2.8,mat('#e65100'),0,6.2,0,4);
      belfryRoof.rotation.y=Math.PI/4;
-     const bell=cone(belfry,.75,.85,gold,0,2.2,0);
+     const bell=cone(belfry,1.1,1.2,gold,0,2.8,0);
      animated.push({obj:bell,kind:'bell'});
 
-     // Giant Ebbinghaus Sand Hourglass
-     const hg=new THREE.Group(); hg.position.set(-3.8,1.8,2.2); g.add(hg);
-     cone(hg,.7,.9,mat('#80deea',{transparent:true,opacity:.75}),0,.45,0);
-     const hgB=cone(hg,.7,.9,mat('#80deea',{transparent:true,opacity:.75}),0,-.45,0); hgB.rotation.x=Math.PI;
-     ball(hg,.22,warm,0,0,0);
-     box(hg,1.5,.14,1.5,wood,0,.95,0); box(hg,1.5,.14,1.5,wood,0,-.95,0);
+     // 3. Monumental Archive Colonnade (Scroll Chambers)
+     for(let col=-2; col<=2; col++){
+       cyl(g, .26, .26, 3.2, cream, col*2.2, 2.2, 3.2);
+     }
+     box(g, 11.2, .5, 1.2, mat('#d7ccc8'), 0, 3.9, 3.2);
+
+     // 4. Giant Ebbinghaus Sand Hourglass
+     const hg=new THREE.Group(); hg.position.set(-5.2,2.2,0.8); g.add(hg);
+     cone(hg,1.0,1.3,mat('#80deea',{transparent:true,opacity:.80}),0,.65,0);
+     const hgB=cone(hg,1.0,1.3,mat('#80deea',{transparent:true,opacity:.80}),0,-.65,0); hgB.rotation.x=Math.PI;
+     ball(hg,.32,warm,0,0,0);
+     box(hg,2.2,.18,2.2,wood,0,1.35,0); box(hg,2.2,.18,2.2,wood,0,-1.35,0);
      animated.push({obj:hg,kind:'halo'});
 
-     // Skinner Lever Conditioning Pavilion
-     const skinner=box(g,1.4,1.1,1.4,mat('#37474f'),3.8,1.2,2.0);
-     cyl(skinner,.06,.06,.6,gold,0,.6,0);
-     ball(skinner,.14,mat('#76ff03'),0,1.0,0);
+     // 5. Skinner Operant Conditioning Chamber with Golden Lever
+     const skinner=box(g,2.2,1.6,2.2,mat('#263238'),5.2,1.4,0.8);
+     cyl(skinner,.10,.10,.9,gold,0,.9,0);
+     ball(skinner,.24,mat('#76ff03',{emissive:'#76ff03',emissiveIntensity:.6}),0,1.5,0);
 
-     bench(g,2.2,4.2,-0.5);
-     tree(g,-4.5,-3.8,0,1.2);
+     bench(g,-3.5,4.2,-0.5);
+     bench(g,3.5,4.2,0.5);
+     tree(g,-5.5,-4.2,0,1.4);
+     tree(g,5.5,-4.0,2,1.3);
    }
 
    // -------------------------------------------------------------
@@ -384,33 +419,48 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
      cyl(g,r,r,.25,accents[2],0,.14,0,10);
      g.userData.land=cyl(g,r*.96,r*.98,.22,grass,0,.35,0,10);
 
-     // Deep Rift Canyon across the center: Left Red Crag, Right Blue Logic
-     box(g,r*0.42,2.4,r*0.75,mat('#c62828'),-r*0.35,1.55,0); // Left Plateau (Intuition)
-     box(g,r*0.42,2.4,r*0.75,mat('#1565c0'),r*0.35,1.55,0);  // Right Plateau (Logic)
+     // 1. Deep Rift Canyon: Left Red Intuition Plateau vs Right Blue Logic Citadel
+     box(g,r*0.44,3.2,r*0.82,mat('#c62828'),-r*0.36,1.95,0); // Intuition Plateau
+     box(g,r*0.44,3.2,r*0.82,mat('#1565c0'),r*0.36,1.95,0);  // Logic Citadel
+     // Classical Logic Colonnade on the blue citadel
+     for(let c=0; c<4; c++){
+       cyl(g, .22, .22, 3.2, mat('#bbdefb'), r*0.36 + (c%2?1.2:-1.2), 4.8, (c>1?1.5:-1.5));
+     }
+     box(g, 3.4, .4, 3.8, mat('#e3f2fd'), r*0.36, 6.4, 0);
 
-     // Spanning Decision Tree Bridge
-     box(g,r*0.9,.22,2.2,wood,0,2.8,0);
+     // 2. Spanning Golden Heuristic Bridge
+     box(g,r*0.95,.28,2.8,mat('#ffd54f'),0,3.6,0);
+     cyl(g, .08, .08, 1.8, gold, -2.4, 4.4, 1.3);
+     cyl(g, .08, .08, 1.8, gold, 2.4, 4.4, 1.3);
+     cyl(g, .08, .08, 1.8, gold, -2.4, 4.4, -1.3);
+     cyl(g, .08, .08, 1.8, gold, 2.4, 4.4, -1.3);
 
-     // Decision Tree rising from the canyon bed
-     const treeGroup=new THREE.Group(); treeGroup.position.set(0,1.4,-3.2); g.add(treeGroup);
-     cyl(treeGroup,.32,.45,3.6,wood,0,1.8,0);
-     for(let b=0; b<6; b++){
-       const ba=b*Math.PI*2/6;
-       const branch=cyl(treeGroup,.15,.2,2.2,wood,Math.sin(ba)*1.0,3.2,Math.cos(ba)*1.0);
+     // 3. Colossal Decision Tree of Mind
+     const treeGroup=new THREE.Group(); treeGroup.position.set(0,1.8,-3.8); g.add(treeGroup);
+     cyl(treeGroup,.45,.65,4.8,wood,0,2.4,0);
+     for(let b=0; b<8; b++){
+       const ba=b*Math.PI*2/8;
+       const branch=cyl(treeGroup,.22,.28,3.2,wood,Math.sin(ba)*1.4,4.2,Math.cos(ba)*1.4);
        branch.rotation.z=Math.sin(ba)*.5;
        branch.rotation.x=Math.cos(ba)*.5;
-       ball(treeGroup,.45,gold,Math.sin(ba)*2.0,4.1,Math.cos(ba)*2.0);
+       ball(treeGroup,.65,gold,Math.sin(ba)*2.8,5.4,Math.cos(ba)*2.8);
      }
 
-     // Kahneman Balance Scale
-     cyl(g,.24,.3,4.6,wood,0,3.0,3.2);
-     const beam=box(g,5.5,.22,.22,mat('#ff9800'),0,5.2,3.2);
+     // 4. Monumental Kahneman Balance Scale (7.2m Wide)
+     cyl(g,.32,.42,5.8,dark,0,3.6,3.6);
+     const beam=box(g,7.2,.28,.28,mat('#ff9800'),0,6.4,3.6);
      animated.push({obj:beam,kind:'gear'});
-     cyl(g,.03,.03,1.8,dark,-2.2,4.4,3.2); ball(g,.65,mat('#ff5252'),-2.2,3.8,3.2);
-     cyl(g,.03,.03,1.8,dark,2.2,4.4,3.2); box(g,.9,.9,.9,mat('#448aff'),2.2,3.8,3.2);
+     cyl(g,.04,.04,2.4,dark,-2.8,5.2,3.6); ball(g,.95,mat('#ff5252'),-2.8,4.2,3.6);
+     cyl(g,.04,.04,2.4,dark,2.8,5.2,3.6); box(g,1.3,1.3,1.3,mat('#448aff'),2.8,4.2,3.6);
 
-     bench(g,-3.8,4.2,0.4);
-     bench(g,3.8,4.2,-0.4);
+     // 5. Rational Chessboard Tiles
+     box(g, 4.2, .1, 4.2, cream, 0, .45, 0);
+     cyl(g, .45, .6, 1.4, dark, -1.2, 1.1, -1.2); // Chess King piece
+     cyl(g, .38, .5, 1.2, white, 1.2, 1.0, 1.2);  // Chess Queen piece
+
+     bench(g,-4.5,4.8,0.4);
+     bench(g,4.5,4.8,-0.4);
+     tree(g,5.6,-3.8,2,1.4);
    }
 
    // -------------------------------------------------------------
@@ -422,32 +472,42 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
      cyl(g,r,r,.25,accents[3],0,.14,0,10);
      g.userData.land=cyl(g,r*.96,r*.98,.22,grass,0,.35,0,10);
 
-     // 5 Stepped Terraces (Maslow Hierarchy)
+     // 1. Grand 5-Stepped Terraces of Maslow's Hierarchy (Pyramid Citadel)
      const pLvls=[
-       {w:r*1.2,h:.65,c:mat('#d32f2f')}, // Physiological
-       {w:r*0.95,h:.65,c:mat('#f57c00')}, // Safety
-       {w:r*0.72,h:.65,c:mat('#fbc02d')}, // Love & Belonging
-       {w:r*0.50,h:.65,c:mat('#388e3c')}, // Esteem
-       {w:r*0.30,h:.65,c:mat('#7b1fa2')}  // Self-Actualization
+       {w:r*1.15,h:.75,c:mat('#e53935')}, // Physiological (Red)
+       {w:r*0.92,h:.75,c:mat('#fb8c00')}, // Safety (Orange)
+       {w:r*0.70,h:.75,c:mat('#fdd835')}, // Love & Belonging (Yellow)
+       {w:r*0.48,h:.75,c:mat('#43a047')}, // Esteem (Green)
+       {w:r*0.28,h:.75,c:mat('#8e24aa')}  // Self-Actualization (Purple)
      ];
      let yb=.6;
      for(const lvl of pLvls){
        box(g,lvl.w,lvl.h,lvl.w,lvl.c,0,yb+lvl.h/2,0);
        yb+=lvl.h;
      }
-     // Apex Star of Self-Actualization
-     const star=mesh(g,new THREE.OctahedronGeometry(.85,0),gold,0,yb+.55,0);
+
+     // 2. Radiant Apex Star of Self-Actualization (1.4m Octahedron)
+     const star=mesh(g,new THREE.OctahedronGeometry(1.4,0),gold,0,yb+.85,0);
      animated.push({obj:star,kind:'halo'});
-     // Pulsing Emotional Wave Ring
-     const heartRing=torus(g,3.8,.12,warm,0,2.8,0);
+     // Pulsing Emotional Wave Rings
+     const heartRing=torus(g,5.2,.16,warm,0,3.6,0);
      animated.push({obj:heartRing,kind:'halo'});
 
-     // Thermal Springs
-     cyl(g,1.4,1.4,.25,mat('#00e5ff'),-3.6,.6,2.8);
-     torus(g,1.5,.18,rock,-3.6,.6,2.8);
+     // 3. Dual Steaming Turquoise Thermal Mineral Springs
+     cyl(g,2.2,2.2,.28,mat('#00e5ff',{transparent:true,opacity:.85}),-4.6,.6,3.6);
+     torus(g,2.4,.24,rock,-4.6,.6,3.6);
 
-     bench(g,3.8,3.2,-0.6);
-     tree(g,4.5,-3.2,2,1.2);
+     cyl(g,1.8,1.8,.28,mat('#ff4081',{transparent:true,opacity:.80}),4.6,.6,3.6);
+     torus(g,2.0,.22,rock,4.6,.6,3.6);
+
+     // 4. Emotional Passion Beacon Pillar
+     cyl(g, .45, .6, 6.2, mat('#d81b60'), 4.8, 3.6, -3.2);
+     ball(g, .75, warm, 4.8, 6.8, -3.2);
+
+     bench(g,-4.5,4.2,-0.5);
+     bench(g,4.5,4.2,0.5);
+     tree(g,-5.6,-3.6,2,1.4);
+     tree(g,5.6,-2.8,1,1.3);
    }
 
    // -------------------------------------------------------------
@@ -455,32 +515,37 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
    // 5 Outstretched star capes pointing towards O-C-E-A-N
    // -------------------------------------------------------------
    else if(i===4){
-     // 5-Pointed Star Base Geometry
      cyl(g,r*.95,r*1.15,depth,rock,0,.2-depth/2,0,5);
      cyl(g,r,r,.25,accents[4],0,.14,0,5);
      g.userData.land=cyl(g,r*.96,r*.98,.22,grass,0,.35,0,5);
 
-     // 5 Colored Spires corresponding to OCEAN on the 5 Star Points
-     const oceanCols=[mat('#00bcd4'),mat('#5c6bc0'),mat('#fbc02d'),mat('#4caf50'),mat('#ab47bc')];
+     // 1. 5 Grand Spires of Personality (OCEAN on the 5 Bastion Capes, Height 6.8m)
+     const oceanCols=[mat('#00bcd4'),mat('#3f51b5'),mat('#ffb300'),mat('#43a047'),mat('#8e24aa')];
      for(let k=0; k<5; k++){
        const a=k*Math.PI*2/5;
-       const px=Math.sin(a)*r*0.78, pz=Math.cos(a)*r*0.78;
-       cyl(g,.35,.18,4.6,oceanCols[k],px,2.8,pz);
-       cone(g,.38,.85,warm,px,5.4,pz);
-       ball(g,.32,oceanCols[k],px,1.2,pz);
+       const px=Math.sin(a)*r*0.76, pz=Math.cos(a)*r*0.76;
+       cyl(g,.55,.32,5.8,oceanCols[k],px,3.2,pz);
+       cone(g,.65,1.6,warm,px,6.8,pz);
+       torus(g, .85, .12, gold, px, 4.8, pz);
+       ball(g,.45,oceanCols[k],px,1.4,pz);
      }
 
-     // Jungian Persona & Shadow Obelisk
-     const jung=mesh(g,new THREE.BoxGeometry(1.1,3.8,1.1),dark,0,2.6,0);
-     box(jung,1.14,1.1,1.14,cream,0,.9,0);
-     box(jung,1.14,1.1,1.14,mat('#1a1a1a'),0,-.9,0);
+     // 2. Colossal Jungian Persona & Shadow Obelisk (Dual Black & White Monolith)
+     const jung=mesh(g,new THREE.BoxGeometry(1.8,5.2,1.8),dark,0,3.2,0);
+     box(jung,1.88,1.6,1.88,cream,0,1.4,0);
+     box(jung,1.88,1.6,1.88,mat('#121212'),0,-1.4,0);
 
-     // Kaleidoscopic Personality Prism
-     const kaleido=mesh(g,new THREE.IcosahedronGeometry(1.2,0),gold,0,5.6,0);
+     // 3. Rotating Kaleidoscopic Personality Prism
+     const kaleido=mesh(g,new THREE.IcosahedronGeometry(1.8,0),gold,0,7.2,0);
      animated.push({obj:kaleido,kind:'halo'});
 
-     bench(g,-3.5,3.2,0.5);
-     tree(g,3.8,-3.5,0,1.2);
+     // 4. Circular Topiary Garden Plaza
+     torus(g, 4.2, .24, cream, 0, .45, 0);
+
+     bench(g,-4.2,3.8,0.5);
+     bench(g,4.2,3.8,-0.5);
+     tree(g,5.2,-4.2,0,1.4);
+     tree(g,-5.2,-4.2,2,1.4);
    }
 
    // -------------------------------------------------------------
@@ -492,26 +557,41 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
      cyl(g,r,r,.25,accents[5],0,.14,0,12);
      g.userData.land=cyl(g,r*.96,r*.98,.22,grass,0,.35,0,12);
 
-     // Sunken Agora Amphitheater Rings
-     for(let step=1; step<=3; step++){
-       const rad=r*(0.4+step*0.14);
-       torus(g,rad,.25,cream,0,.5+step*0.25,-0.8);
+     // 1. Concentric Amphitheater Agora (4 Tiered Stone Steps)
+     for(let step=1; step<=4; step++){
+       const rad=r*(0.35+step*0.12);
+       torus(g,rad,.32,cream,0,.5+step*0.28,-0.8);
      }
 
-     // Asch Conformity Line Segment Columns
+     // 2. Central Campfire of Community (Warm Glowing Fellowship Hearth)
+     cyl(g, 1.4, 1.6, .35, rock, 0, .6, -0.8);
+     const hearthFire = ball(g, .75, warm, 0, 1.2, -0.8);
+     animated.push({ obj: hearthFire, kind: 'bell' });
+
+     // 3. Asch Conformity Line Segment Columns (Monumental Social Influence Pillars)
      const colMat=[mat('#ff7043'),mat('#26a69a'),gold,mat('#26a69a')];
-     const heights=[3.4,2.2,3.4,4.8];
+     const heights=[4.8,2.8,4.8,6.8];
      for(let k=0; k<4; k++){
-       const x=-2.4+k*1.6;
-       cyl(g,.28,.28,heights[k],colMat[k],x,.45+heights[k]/2,2.8);
-       ball(g,.24,white,x,.45+heights[k]+.24,2.8);
+       const x=-3.6+k*2.4;
+       cyl(g,.38,.38,heights[k],colMat[k],x,.45+heights[k]/2,3.8);
+       ball(g,.45,white,x,.45+heights[k]+.4,3.8);
      }
 
-     // Empathy Arch of Prosocial Connection
-     torus(g,2.2,.22,mat('#ec407a'),0,3.6,-.8);
+     // 4. Monumental Empathy Archway of Prosocial Connection
+     torus(g,3.4,.32,mat('#ec407a'),0,4.8,-.8);
+     ball(g, .6, gold, -2.4, 4.8, -.8);
+     ball(g, .6, gold, 2.4, 4.8, -.8);
 
-     bench(g,-4.0,3.6,0.3);
-     tree(g,4.5,-2.8,0,1.2);
+     // 5. Celebration Pillars with Festive Lanterns
+     cyl(g, .15, .15, 3.6, wood, -5.2, 2.2, 0);
+     ball(g, .35, warm, -5.2, 4.1, 0);
+     cyl(g, .15, .15, 3.6, wood, 5.2, 2.2, 0);
+     ball(g, .35, warm, 5.2, 4.1, 0);
+
+     bench(g,-4.5,4.2,0.3);
+     bench(g,4.5,4.2,-0.3);
+     tree(g,5.6,-3.6,0,1.4);
+     tree(g,-5.6,-3.6,1,1.4);
    }
 
    g.children.slice(landmarkStart).forEach(o=>o.traverse(m=>{if(m.isMesh)m.userData.building=data.courses[i].id;}));
