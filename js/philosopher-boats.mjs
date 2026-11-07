@@ -12,13 +12,14 @@ export const PHILOSOPHERS_DATA = [
     name: '希帕蒂亞 (Hypatia of Alexandria)',
     era: '西元 4 世紀 · 古代亞歷山卓',
     title: '亞歷山卓學派首位偉大女性哲學家、天文學家與數學家',
-    avatar: 'assets/psi.svg',
+    avatar: 'assets/images/hypatia.jpg',
     hullColor: '#2b3a67',
     sailColor: '#f7f4ea',
     accentColor: '#9b5de5',
     flagColor: '#f15bb5',
     quote: '保留你思考的權利，因為就算思考錯誤，也比完全不思考要好。',
     insight: '「獨立思辨是心靈最崇高的自由。當大腦勇敢質疑未經檢驗的常規，我們才真正站在自我意識的起點。」',
+    lifeStory: '古代亞歷山卓最後的璀璨明燈，精通新柏拉圖主義哲學與幾何學，被譽為「以理性與數學啟蒙心智的殉道者」。',
     psychologyConnection: '連結「感知覺醒島」與「理性思維島」：認知心理學中的元認知（Metacognition）與批判性思維。',
     relatedCourseId: 'island-01',
     relatedCourseName: '感知覺醒島',
@@ -29,13 +30,14 @@ export const PHILOSOPHERS_DATA = [
     name: '蘇格拉底 (Socrates)',
     era: '西元前 5 世紀 · 古希臘雅典',
     title: '西方哲學之父 · 靈魂產婆術的開創者',
-    avatar: 'assets/psi.svg',
+    avatar: 'assets/images/socrates.jpg',
     hullColor: '#5c4033',
     sailColor: '#fdfbf7',
     accentColor: '#d4a373',
     flagColor: '#e76f51',
     quote: '未經審視的人生是不值得活的。我唯一知道的事，就是我一無所知。',
     insight: '「真正的智慧始於承認自己的盲點。唯有不斷自我反思、探問內心深處的假設，靈魂才能擺脫偏見的牢籠。」',
+    lifeStory: '古希臘哲學先驅，堅持「產婆術」詰問，引導人們辨析真偽認知，奠定西方批判思考與認知治療的源頭。',
     psychologyConnection: '連結「中央衛城」與「理性思維島」：認知行為治療（CBT）的蘇格拉底提問法與自我覺察。',
     relatedCourseId: 'island-03',
     relatedCourseName: '理性思維島',
@@ -46,13 +48,14 @@ export const PHILOSOPHERS_DATA = [
     name: '西蒙·波娃 (Simone de Beauvoir)',
     era: '20 世紀 · 法國巴黎',
     title: '現代存在主義哲學宗師 · 女性自我覺醒先驅',
-    avatar: 'assets/psi.svg',
+    avatar: 'assets/images/simone-de-beauvoir.jpg',
     hullColor: '#6a040f',
     sailColor: '#fff0f3',
     accentColor: '#9d0208',
     flagColor: '#ffba08',
     quote: '人不是生而為女人，而是成為女人。唯有自由地選擇自己，靈魂才能抵達真實。',
     insight: '「我們的自我不是宿命決定的固定標本，而是在一次次有意識的抉擇中創造出來的。擁抱你的自由，無懼世界的目光。」',
+    lifeStory: '20 世紀存在主義哲學家，以《第二性》剖析性別基模與社會化建構，倡導人應自由塑造自我認同。',
     psychologyConnection: '連結「人格演繹島」與「動機與情緒島」：發展心理學中的自我認同探索、性別基模與自我實現。',
     relatedCourseId: 'island-05',
     relatedCourseName: '人格演繹島',
@@ -63,13 +66,14 @@ export const PHILOSOPHERS_DATA = [
     name: '漢娜·鄂蘭 (Hannah Arendt)',
     era: '20 世紀 · 現代思想家',
     title: '極權主義與平庸之惡的深刻省思者',
-    avatar: 'assets/psi.svg',
+    avatar: 'assets/images/hannah-arendt.jpg',
     hullColor: '#1d3557',
     sailColor: '#f1faee',
     accentColor: '#457b9d',
     flagColor: '#e63946',
     quote: '平庸之惡源於停止思考；思考本身就是一種危險的事業，但完全不思考更是無比危險。',
     insight: '「當一個人停止獨立思考、盲目服從群體常態時，心靈便陷入最沉重的昏睡。思考是保護我們不被集體盲從吞噬的唯一防線。」',
+    lifeStory: '現代重要政治哲學家，見證納粹大屠殺後提出「平庸之惡」，深刻剖析盲從體制對個人道德心智的侵蝕。',
     psychologyConnection: '連結「社會共振島」：社會心理學中的阿許從眾實驗、米爾格倫服從權威與責任分散效應。',
     relatedCourseId: 'island-06',
     relatedCourseName: '社會共振島',
@@ -80,13 +84,14 @@ export const PHILOSOPHERS_DATA = [
     name: '瑪麗·卡爾金斯 (Mary Whiton Calkins)',
     era: '19 世紀末 · 美國心理學界先驅',
     title: '美國心理學會（APA）首位女性主席 · 自我心理學奠基者',
-    avatar: 'assets/psi.svg',
+    avatar: 'assets/images/mary-whiton-calkins.jpg',
     hullColor: '#403d39',
     sailColor: '#fffcf2',
     accentColor: '#ccc5b9',
     flagColor: '#eb5e28',
     quote: '自我不是孤立的幽靈，而是在與他人的關係中不斷被經驗與理解的心靈存在。',
     insight: '「心理學的核心不是冷冰冰的數據，而是鮮活的自我經驗。每一刻的自尊與心智成長，都源於你如何看待自己與世界的連結。」',
+    lifeStory: '美國心理學會（APA）史上首位女性主席，在哈佛大學拒授學位逆境下創立「自我心理學（Self-Psychology）」。',
     psychologyConnection: '連結「記憶之宮島」與「人格演繹島」：配對聯想記憶研究與自尊心理學。',
     relatedCourseId: 'island-02',
     relatedCourseName: '記憶之宮島',
@@ -97,13 +102,14 @@ export const PHILOSOPHERS_DATA = [
     name: '亞里斯多德 (Aristotle)',
     era: '西元前 4 世紀 · 古希臘逍遙學派',
     title: '百科全書式先哲 · 歷史上第一部心靈論著《靈魂論》作者',
-    avatar: 'assets/psi.svg',
+    avatar: 'assets/images/aristotle.jpg',
     hullColor: '#3d314a',
     sailColor: '#f8f9fa',
     accentColor: '#684756',
     flagColor: '#ffd166',
     quote: '認識自己是所有智慧的源頭。重複的行為塑造了我們，因此卓越不是一種行為，而是一種習慣。',
     insight: '「心智宛如一塊白板，世界在上面刻下記憶。找到理智與情感的黃金中庸之道，便是心靈最豐盛的幸福。」',
+    lifeStory: '著有歷史上第一部系統性心靈論著《靈魂論（De Anima）》，開創經驗主義與習慣塑造成熟人格的學說。',
     psychologyConnection: '連結「記憶之宮島」與「動機與情緒島」：行為習慣養成、經驗主義與正向心理學（Eudaimonia）。',
     relatedCourseId: 'island-04',
     relatedCourseName: '動機與情緒島',
@@ -114,13 +120,14 @@ export const PHILOSOPHERS_DATA = [
     name: '勒內·笛卡兒 (René Descartes)',
     era: '17 世紀 · 法國理性主義先驅',
     title: '近代哲學奠基者 · 心物二元論與座標幾何之父',
-    avatar: 'assets/psi.svg',
+    avatar: 'assets/images/rene-descartes.jpg',
     hullColor: '#1a2238',
     sailColor: '#ede8f5',
     accentColor: '#9daaf2',
     flagColor: '#ff6a3d',
     quote: '我思，故我在（Cogito, ergo sum）。懷疑一切，方能抵達不可動搖的真實。',
     insight: '「哪怕感知有時會被錯覺欺騙，正在質疑與思考的我，卻是絕對真實的存在。大膽運用你的理性之光照亮黑暗。」',
+    lifeStory: '提出「心物二元論」與神經反射概念，以「我思故我在」確立懷疑與理性思維在心智中的核心地位。',
     psychologyConnection: '連結「感知覺醒島」：神經反射弧模型、身心關係與知覺懷疑論。',
     relatedCourseId: 'island-01',
     relatedCourseName: '感知覺醒島',
@@ -342,9 +349,16 @@ export function createPhilosopherBoats(scene, options = {}) {
     dialog.innerHTML = `
       <button class="dialog-close icon-button" aria-label="關閉對話框">✕</button>
       <div class="phil-header">
-        <span class="phil-badge">⛵ 海上智慧偶遇 · 思想之舟</span>
-        <h2>${phil.name}</h2>
-        <span class="phil-era">${phil.era} ｜ ${phil.title}</span>
+        <div class="phil-portrait-wrap">
+          <img src="${phil.avatar}" alt="${phil.name}真實歷史肖像" class="phil-portrait-img" loading="eager">
+          <span class="phil-portrait-badge">歷史真實肖像</span>
+        </div>
+        <div class="phil-header-info">
+          <span class="phil-badge">⛵ 海上智慧偶遇 · 思想之舟</span>
+          <h2>${phil.name}</h2>
+          <span class="phil-era">${phil.era} ｜ ${phil.title}</span>
+          ${phil.lifeStory ? `<p class="phil-bio-snippet">${phil.lifeStory}</p>` : ''}
+        </div>
       </div>
 
       <div class="phil-quote-box">
