@@ -14,11 +14,11 @@ import {createCharacterController} from './character-controller.mjs';
 
 export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFocus}){
  const ISLAND_LAYOUT=layoutFor(data.courses.length),palette=paletteFor(data.appearance);
- const mapExtent=Math.max(...ISLAND_LAYOUT.map(n=>Math.hypot(n.x,n.z)+n.radius)),mapWidth=Math.max(83,mapExtent*2.8);
+ const mapExtent=Math.max(...ISLAND_LAYOUT.map(n=>Math.hypot(n.x,n.z)+n.radius)),mapWidth=Math.max(120,mapExtent*2.6);
  host.dataset.dense=String(data.courses.length>8);
 
  const scene=new THREE.Scene();
- const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'low-power'});
+ const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
  renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));
  renderer.shadowMap.enabled=true;
  renderer.shadowMap.autoUpdate=false;
@@ -27,7 +27,6 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
  renderer.outputColorSpace=THREE.SRGBColorSpace;
  renderer.setClearColor(0xd7d0e7);
 
- // Labels and character prompts overlay the canvas; their wheel input must reach OrbitControls too.
  host.addEventListener('wheel',e=>{
    if(e.target===renderer.domElement)return;
    renderer.domElement.dispatchEvent(new WheelEvent('wheel',{deltaX:e.deltaX,deltaY:e.deltaY,deltaZ:e.deltaZ,deltaMode:e.deltaMode,clientX:e.clientX,clientY:e.clientY,ctrlKey:e.ctrlKey,shiftKey:e.shiftKey,altKey:e.altKey,metaKey:e.metaKey,cancelable:true,bubbles:false}));
@@ -35,7 +34,7 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
  },{passive:false});
 
  host.appendChild(renderer.domElement);
- renderer.domElement.setAttribute('aria-label','拖曳旋轉課程群島，或使用鍵盤WASD/點擊地面操作人物探索');
+ renderer.domElement.setAttribute('aria-label','拖曳旋轉課程群島，或使用鍵盤方向鍵/觸控操作人物自由探索');
 
  const leaders=document.createElementNS('http://www.w3.org/2000/svg','svg');
  leaders.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:hidden';
@@ -46,259 +45,304 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
  labelRenderer.domElement.style.cssText='position:absolute;inset:0;pointer-events:none;overflow:hidden';
  host.appendChild(labelRenderer.domElement);
 
- const camera=new THREE.OrthographicCamera(-40,40,30,-30,.1,Math.max(250,mapExtent*5));
- const cameraOffset=new THREE.Vector3(40,57,66).multiplyScalar(Math.max(1,mapExtent/35));
- camera.position.copy(cameraOffset).add(new THREE.Vector3(0,3,0));
- camera.lookAt(0,3,0);
+ // Expanded camera view frustum with deep zoom range
+ const camera=new THREE.OrthographicCamera(-mapWidth/2,mapWidth/2,mapWidth/2,-mapWidth/2,.1,Math.max(400,mapExtent*8));
+ const cameraOffset=new THREE.Vector3(55,75,90).multiplyScalar(Math.max(1,mapExtent/45));
+ camera.position.copy(cameraOffset).add(new THREE.Vector3(0,4,0));
+ camera.lookAt(0,4,0);
 
  const controls=new OrbitControls(camera,renderer.domElement);
  controls.enablePan=false;
  controls.enableDamping=true;
  controls.dampingFactor=.08;
- controls.minZoom=.2;
- controls.maxZoom=Math.max(12,mapWidth/8);
- controls.minPolarAngle=.2;
- controls.maxPolarAngle=Math.PI/2.6;
- controls.target.set(0,3,0);
+ controls.minZoom=0.12;  // High-altitude panoramic map view
+ controls.maxZoom=48.0;  // Close-up character inspection view
+ controls.minPolarAngle=.18;
+ controls.maxPolarAngle=Math.PI/2.4;
+ controls.target.set(0,3.8,0);
  controls.update();
 
- const ambient=new THREE.HemisphereLight(0xfff2da,0xb8a8c5,1.9);
+ const ambient=new THREE.HemisphereLight(0xfff5e4,0xb4a4c5,2.1);
  scene.add(ambient);
- const sun=new THREE.DirectionalLight(0xfff7ef,2.5);
- sun.position.set(-30,55,22);
+ const sun=new THREE.DirectionalLight(0xfffbf2,2.6);
+ sun.position.set(-45,85,35);
  sun.castShadow=true;
- sun.shadow.mapSize.set(1536,1536);
- Object.assign(sun.shadow.camera,{left:-mapExtent*1.25,right:mapExtent*1.25,top:mapExtent*1.25,bottom:-mapExtent*1.25,near:1,far:Math.max(140,mapExtent*5)});
- sun.shadow.bias=-.001;
+ sun.shadow.mapSize.set(2048,2048);
+ Object.assign(sun.shadow.camera,{
+   left:-mapExtent*1.3,
+   right:mapExtent*1.3,
+   top:mapExtent*1.3,
+   bottom:-mapExtent*1.3,
+   near:1,
+   far:Math.max(250,mapExtent*6)
+ });
+ sun.shadow.bias=-.0008;
  scene.add(sun);
 
- const mat=(color,extra={})=>new THREE.MeshStandardMaterial({color,roughness:.82,flatShading:true,...extra});
- const cream=mat('#fff0df'),rock=mat(palette.rock),grass=mat(palette.grass),wood=mat('#c9af9c'),white=mat('#fffaf1'),dark=mat('#84718d'),teal=mat(palette.roof),orange=mat('#efb77e'),purple=mat('#bba5d6'),gold=mat('#ffd700',{metalness:.3,roughness:.4});
- const warm=new THREE.MeshStandardMaterial({color:0xffe4a1,emissive:0xffd27c,emissiveIntensity:.15});
- const lamps=[];
+ const mat=(color,extra={})=>new THREE.MeshStandardMaterial({color,roughness:.80,flatShading:true,...extra});
+ const cream=mat('#fff2e2'),rock=mat(palette.rock),grass=mat(palette.grass),wood=mat('#c9af9c'),white=mat('#fffaf1'),dark=mat('#7d6b88'),teal=mat(palette.roof),orange=mat('#efa86b'),purple=mat('#b59cd0'),gold=mat('#ffd700',{metalness:.28,roughness:.45});
+ const warm=new THREE.MeshStandardMaterial({color:0xffe4a1,emissive:0xffd27c,emissiveIntensity:.18});
 
  const water=new THREE.MeshBasicMaterial({color:'#d7d0e7'});
- const ocean=new THREE.Mesh(new THREE.PlaneGeometry(Math.max(500,mapExtent*10),Math.max(500,mapExtent*10)),water);
+ const ocean=new THREE.Mesh(new THREE.PlaneGeometry(Math.max(1200,mapExtent*14),Math.max(1200,mapExtent*14)),water);
  ocean.rotation.x=-Math.PI/2;
  ocean.position.y=-1.25;
  scene.add(ocean);
 
- const shadowOcean=new THREE.Mesh(new THREE.PlaneGeometry(Math.max(150,mapExtent*4),Math.max(150,mapExtent*4)),new THREE.ShadowMaterial({color:0x514260,opacity:.16}));
+ const shadowOcean=new THREE.Mesh(new THREE.PlaneGeometry(Math.max(300,mapExtent*5),Math.max(300,mapExtent*5)),new THREE.ShadowMaterial({color:0x4d3b5c,opacity:.18}));
  shadowOcean.rotation.x=-Math.PI/2;
  shadowOcean.position.y=-1.24;
  shadowOcean.receiveShadow=true;
  scene.add(shadowOcean);
 
- const mesh=(parent,geo,material,x=0,y=0,z=0)=>{let m=new THREE.Mesh(geo,material);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;};
+ const mesh=(parent,geo,material,x=0,y=0,z=0)=>{
+   let m=new THREE.Mesh(geo,material);
+   m.position.set(x,y,z);
+   m.castShadow=true;
+   m.receiveShadow=true;
+   parent.add(m);
+   return m;
+ };
  const box=(p,w,h,d,m,x=0,y=0,z=0)=>mesh(p,new THREE.BoxGeometry(w,h,d),m,x,y,z);
- const cyl=(p,r1,r2,h,m,x=0,y=0,z=0,n=10)=>mesh(p,new THREE.CylinderGeometry(r1,r2,h,n),m,x,y,z);
+ const cyl=(p,r1,r2,h,m,x=0,y=0,z=0,n=12)=>mesh(p,new THREE.CylinderGeometry(r1,r2,h,n),m,x,y,z);
  const ball=(p,r,m,x=0,y=0,z=0)=>mesh(p,new THREE.IcosahedronGeometry(r,1),m,x,y,z);
- const cone=(p,r,h,m,x=0,y=0,z=0,n=8)=>mesh(p,new THREE.ConeGeometry(r,h,n),m,x,y,z);
- const torus=(p,r,t,m,x,y,z)=>mesh(p,new THREE.TorusGeometry(r,t,6,20),m,x,y,z);
-
- const lamp=(p,x,z)=>{cyl(p,.06,.08,2,dark,x,1.3,z);cyl(p,.2,.11,.16,wood,x,2.3,z);ball(p,.18,warm,x,2.55,z);lamps.push(p);};
+ const cone=(p,r,h,m,x=0,y=0,z=0,n=10)=>mesh(p,new THREE.ConeGeometry(r,h,n),m,x,y,z);
+ const torus=(p,r,t,m,x,y,z)=>mesh(p,new THREE.TorusGeometry(r,t,8,24),m,x,y,z);
 
  function tree(p,x,z,type=0,scale=1){
    const g=new THREE.Group();g.position.set(x,.25,z);g.scale.setScalar(scale);p.add(g);
-   cyl(g,.1,.16,1.15,wood,0,.55);
-   if(type===1){cone(g,.8,1.5,mat('#388e3c'),0,1.5);cone(g,.63,1.3,mat('#66bb6a'),0,2.2);}
-   else if(type===2){ball(g,.75,mat('#ec407a'),0,1.6,0);ball(g,.58,mat('#f48fb1'),.4,1.9,.1);}
-   else{ball(g,.75,mat('#43a047'),0,1.6,0);ball(g,.58,mat('#81c784'),.4,1.9,.1);}
+   cyl(g,.15,.22,1.6,wood,0,.8);
+   if(type===1){cone(g,1.1,2.0,mat('#2e7d32'),0,2.1);cone(g,.85,1.7,mat('#43a047'),0,3.0);}
+   else if(type===2){ball(g,1.05,mat('#ec407a'),0,2.1,0);ball(g,.82,mat('#f48fb1'),.5,2.5,.1);}
+   else{ball(g,1.05,mat('#388e3c'),0,2.1,0);ball(g,.85,mat('#66bb6a'),.5,2.5,.1);}
  }
 
- function island(x,z,r,accent,elevation=0,customGeom=null){
-   const g=new THREE.Group();g.position.set(x,elevation,z);
-   g.userData.radius=r;g.userData.elevation=elevation;g.userData.walkRadius=Math.max(3.35,r*.75);
-   scene.add(g);
-   const depth=elevation+1.45;
-   cyl(g,r*.98,r*1.08,depth,rock,0,.2-depth/2,0,8);
-   for(let band=1;band<(elevation>2?3:2);band++){
-     const t=band/3,rad=r*(.98+.1*t);
-     cyl(g,rad+.01,rad+.02,.10,cream,0,.2-depth*t,0,8);
-   }
-   cyl(g,r,r,.25,accent,0,.14,0,8);
-   g.userData.land=cyl(g,r*.98,r*.99,.2,grass,0,.35,0,8);
-   cyl(g,r*1.17,r*1.15,.045,mat('#e1d4e9'),0,-1.20-elevation,0,8);
-   return g;
+ function bench(p,x,z,angle=0){
+   const g=new THREE.Group();g.position.set(x,.75,z);g.rotation.y=angle;p.add(g);
+   box(g,1.8,.18,.55,wood,0,0,0);
+   box(g,1.8,.65,.14,wood,0,.35,-.25);
+   for(const dx of [-.65,.65]) box(g,.14,.75,.4,dark,dx,-.35,0);
  }
-
- function book(p,x,y,z,color=orange){box(p,1.05,.18,.8,color,x,y,z);box(p,.9,.12,.78,white,x,y+.13,z);box(p,1.05,.06,.8,color,x,y+.22,z);}
- function bench(p,x,z){box(p,1.3,.15,.45,wood,x,.75,z);box(p,1.3,.5,.12,wood,x,1,z-.2);for(const dx of [-.45,.45])box(p,.1,.65,.3,dark,x+dx,.35,z);}
 
  const locations=new Map(),labels=[],buildingLabels=[],pickables=[],animated=[];
 
  // =========================================================================
- // 1. CENTRAL ISLAND: 心理學元認知與心靈總所 (Metacognition Institute)
+ // 1. CENTRAL ISLAND: 元認知與心靈總所 (Grand Triple-Tier Academic Acropolis)
  // =========================================================================
  const mainLayout=ISLAND_LAYOUT[0];
- const center=island(mainLayout.x,mainLayout.z,mainLayout.radius,orange,mainLayout.elevation);
+ const center=new THREE.Group();
+ center.position.set(mainLayout.x,mainLayout.elevation,mainLayout.z);
+ center.userData.radius=mainLayout.radius;
+ center.userData.elevation=mainLayout.elevation;
+ center.userData.walkRadius=mainLayout.radius*0.82;
+ scene.add(center);
  locations.set('center',center);
+
+ const depthC=mainLayout.elevation+1.5;
+ // Tier 1 (Base): Broad lawn ring (R=11.2)
+ cyl(center,11.0,12.0,depthC,rock,0,.2-depthC/2,0,16);
+ cyl(center,11.2,11.2,.25,orange,0,.14,0,16);
+ center.userData.land=cyl(center,11.0,11.1,.22,grass,0,.35,0,16);
+ // Tier 2 (Middle): Marble Arcade Colonnade Terrace (R=7.8, elevated +0.8m)
+ cyl(center,7.8,8.2,.85,cream,0,.8,0,16);
+ cyl(center,7.6,7.6,.18,mat('#f5ebd9'),0,1.25,0,16);
+ // Tier 3 (Upper): Golden Sanctuary Podium (R=4.8, elevated +1.6m)
+ cyl(center,4.8,5.2,.9,cream,0,1.7,0,16);
+ cyl(center,4.6,4.6,.15,mat('#ffe5be'),0,2.15,0,16);
+
  const centerLandmarkStart=center.children.length;
 
- // Academic Portico Arcade (8 Classical Columns surrounding the hall)
- cyl(center,3.2,3.4,.3,cream,0,.55,0,16);
- for(let c=0;c<8;c++){
-   const angle=c*Math.PI*2/8;
-   const px=Math.sin(angle)*2.4, pz=Math.cos(angle)*2.4;
-   cyl(center,.14,.14,2.8,white,px,2.0,pz);
-   cyl(center,.22,.18,.25,cream,px,.7,pz);
-   cyl(center,.18,.22,.25,cream,px,3.4,pz);
+ // 12 Classical Corinthian Columns with Arched Entablature
+ for(let c=0; c<12; c++){
+   const angle=c*Math.PI*2/12;
+   const px=Math.sin(angle)*6.2, pz=Math.cos(angle)*6.2;
+   cyl(center,.22,.22,3.4,white,px,3.0,pz);
+   cyl(center,.32,.25,.35,cream,px,1.4,pz);
+   cyl(center,.25,.32,.35,cream,px,4.7,pz);
  }
- // Central Grand Library Archway Dome
- cyl(center,1.8,2.2,2.2,cream,0,2.1,0,16);
- cyl(center,1.4,1.4,2.4,orange,0,3.8,0,16);
- const centralDome=cone(center,2.2,1.6,teal,0,5.8,0,16);
- // Fountain of Metacognition with glowing water
- cyl(center,1.1,1.1,.25,teal,0,6.7);
- const halo=torus(center,1.4,.08,gold,0,7.8,0);
+ // Grand Rotunda Library Dome
+ cyl(center,2.8,3.2,2.8,cream,0,3.6,0,16);
+ cyl(center,2.2,2.2,3.2,orange,0,5.6,0,16);
+ cone(center,3.2,2.2,teal,0,8.1,0,16);
+
+ // Fountain of Metacognition
+ cyl(center,1.6,1.6,.35,teal,0,9.3);
+ const halo=torus(center,2.2,.10,gold,0,10.6,0);
  animated.push({obj:halo,kind:'halo'});
 
  // 3D Psychology Symbol: Greek Letter Psi (Ψ) Monument
  const psiGroup=new THREE.Group();
- psiGroup.position.set(0,8.3,0);
+ psiGroup.position.set(0,11.5,0);
  center.add(psiGroup);
- cyl(psiGroup,.14,.14,2.2,gold,0,0,0);
- const psiArmL=torus(psiGroup,.72,.09,gold,-.45,.25,0);psiArmL.rotation.z=Math.PI/4;
- const psiArmR=torus(psiGroup,.72,.09,gold,.45,.25,0);psiArmR.rotation.z=-Math.PI/4;
- box(psiGroup,.32,.12,.14,gold,-.95,.8,0);
- box(psiGroup,.32,.12,.14,gold,.95,.8,0);
- box(psiGroup,.32,.12,.14,gold,0,1.15,0);
- ball(psiGroup,.24,warm,0,1.35,0);
+ cyl(psiGroup,.18,.18,3.0,gold,0,0,0);
+ const psiArmL=torus(psiGroup,1.0,.12,gold,-.65,.35,0); psiArmL.rotation.z=Math.PI/4;
+ const psiArmR=torus(psiGroup,1.0,.12,gold,.65,.35,0); psiArmR.rotation.z=-Math.PI/4;
+ box(psiGroup,.45,.16,.18,gold,-1.35,1.1,0);
+ box(psiGroup,.45,.16,.18,gold,1.35,1.1,0);
+ box(psiGroup,.45,.16,.18,gold,0,1.55,0);
+ ball(psiGroup,.35,warm,0,1.85,0);
  animated.push({obj:psiGroup,kind:'halo'});
 
- // Monumental Textbook of Psychology: 《現代心理學》
- book(center,-2.0,.7,1.8,mat('#8b1e1b'));
- bench(center,-2.2,-1.5);
- bench(center,2.2,-1.5);
- lamp(center,-3.8,1.8);
- lamp(center,3.8,1.8);
+ // Statues, Benches and Trees in the vast Academic Promenade
+ bench(center,-5.5,2.5,0.4);
+ bench(center,5.5,2.5,-0.4);
+ bench(center,0,-6.5,Math.PI);
+ tree(center,-8.2,-3.5,1,1.2);
+ tree(center,8.2,-3.5,0,1.2);
+ tree(center,-7.5,4.8,2,1.1);
+ tree(center,7.5,4.8,0,1.1);
 
  center.children.slice(centerLandmarkStart).forEach(o=>o.traverse(m=>{if(m.isMesh)m.userData.building='center';}));
 
  // =========================================================================
- // 2. SIX COURSE ISLANDS WITH STRONG PSYCHOLOGICAL DIFFERENTIATION
+ // 2. SIX ENLARGED COURSE ISLANDS WITH HIGH IDIOSYNCRATIC GEOMETRIES
  // =========================================================================
  const accents=[mat('#00b4d8'),mat('#ffb703'),mat('#3a86ff'),mat('#e63946'),mat('#8338ec'),mat('#fb5607')];
 
- for(let i=0;i<data.courses.length;i++){
+ for(let i=0; i<data.courses.length; i++){
    const layout=ISLAND_LAYOUT[i+1];
-   const g=island(layout.x,layout.z,layout.radius,accents[i%accents.length],layout.elevation);
-   g.rotation.y=[.12,-.22,.28,-.1,.2,-.3,.08][i%7];
+   const r=layout.radius;
+   const elev=layout.elevation;
+   const g=new THREE.Group();
+   g.position.set(layout.x,elev,layout.z);
+   g.userData.radius=r;
+   g.userData.elevation=elev;
+   g.userData.walkRadius=r*0.84;
+   scene.add(g);
    locations.set(data.courses[i].id,g);
+
+   const depth=elev+1.45;
    const landmarkStart=g.children.length;
 
    // -------------------------------------------------------------
-   // Island 01: 感知覺醒島 (Sensation & Gestalt Perception)
-   // Necker Cube optical crystal, Penrose stairwell & Rubin vase gate
+   // Island 01: 感知覺醒島 (Prismatic Star Bastion - Sensation)
+   // 6-Faceted crystal star geometry with emergent quartz spires
    // -------------------------------------------------------------
    if(i===0){
-     cyl(g,2.5,2.7,.25,cream,0,.55,0,12);
-     // Rubin's Vase Archway (Twin Silhouette Columns)
-     box(g,.6,4.0,.6,mat('#5c6bc0'),-1.4,2.55,0);
-     box(g,.6,4.0,.6,mat('#5c6bc0'),1.4,2.55,0);
-     box(g,3.4,.45,.7,mat('#26c6da'),0,4.6,0);
-     // Penrose Impossible Stairs Ring
-     for(let s=0;s<6;s++){
-       const sa=s*Math.PI*2/6;
-       box(g,.6,.25+s*.15,.6,cream,Math.sin(sa)*1.8,.6+s*.1,Math.cos(sa)*1.8);
+     cyl(g,r*.95,r*1.12,depth,rock,0,.2-depth/2,0,6);
+     cyl(g,r,r,.25,accents[0],0,.14,0,6);
+     g.userData.land=cyl(g,r*.96,r*.98,.22,grass,0,.35,0,6);
+
+     // Emergent Quartz Crystal Clusters along the perimeter cliffs
+     for(let k=0; k<6; k++){
+       const a=k*Math.PI/3;
+       const cx=Math.sin(a)*r*0.82, cz=Math.cos(a)*r*0.82;
+       const crystal=mesh(g,new THREE.OctahedronGeometry(1.6,0),mat('#80deea',{transparent:true,opacity:.85}),cx,.9,cz);
+       crystal.scale.set(0.7,1.8,0.7);
      }
-     // Optical Necker Cube wireframe crystal hovering in the center
-     const necker=mesh(g,new THREE.BoxGeometry(1.4,1.4,1.4),mat('#00e5ff',{wireframe:true}),0,2.6,0);
+     // Optical Rubin's Vase Colonnade Archway
+     box(g,.8,5.5,.8,mat('#3f51b5'),-2.2,3.1,0);
+     box(g,.8,5.5,.8,mat('#3f51b5'),2.2,3.1,0);
+     box(g,5.2,.6,1.0,mat('#00e5ff'),0,5.8,0);
+
+     // Hovering Necker Cube Optical Illusion
+     const necker=mesh(g,new THREE.BoxGeometry(2.2,2.2,2.2),mat('#00e5ff',{wireframe:true}),0,3.6,0);
      animated.push({obj:necker,kind:'halo'});
-     ball(g,.38,warm,0,2.6,0);
-     // RGB Retinal Cone Sensors
-     for(let c=0;c<3;c++){
-       const color=['#e53935','#43a047','#1e88e5'][c];
-       const a=c*Math.PI*2/3;
-       cyl(g,.15,.08,1.6,mat(color),Math.sin(a)*1.8,1.2,Math.cos(a)*1.8);
-       ball(g,.16,mat(color),Math.sin(a)*1.8,2.1,Math.cos(a)*1.8);
+     ball(g,.5,warm,0,3.6,0);
+
+     // Penrose Impossible Stairs Ring
+     for(let s=0; s<8; s++){
+       const sa=s*Math.PI*2/8;
+       box(g,.9,.3+s*.16,.9,cream,Math.sin(sa)*3.2,.6+s*.12,Math.cos(sa)*3.2);
      }
-     book(g,-1.9,.7,1.5,mat('#00bcd4'));
-     bench(g,2.0,1.8);
+     bench(g,-3.5,3.2,0.3);
+     tree(g,4.2,-2.8,1,1.1);
+     tree(g,-4.5,-2.5,0,1.1);
    }
 
    // -------------------------------------------------------------
-   // Island 02: 記憶之宮島 (Memory Palace & Conditioning)
-   // Roman Colonnade Labyrinth, Ebbinghaus Hourglass & Pavlov Bell
+   // Island 02: 記憶之宮島 (Roman Labyrinth Citadel - Memory)
+   // Multi-tiered fortress with amphitheater steps & Pavlov belfry
    // -------------------------------------------------------------
    else if(i===1){
-     // Colonnade Palace of Loci
-     box(g,3.0,1.8,2.6,cream,0,1.35,0);
-     for(const sx of [-1,1]){
-       for(const sz of [-1,1]){
-         cyl(g,.18,.18,2.6,mat('#ffb300'),sx*1.0,3.3,sz*.85);
-       }
-     }
-     const belfryRoof=cone(g,2.2,1.5,mat('#ff8f00'),0,5.1,0,4);
+     // Multi-tiered stone terraces (Citadel walls)
+     cyl(g,r*.95,r*1.1,depth,rock,0,.2-depth/2,0,12);
+     cyl(g,r,r,.25,accents[1],0,.14,0,12);
+     g.userData.land=cyl(g,r*.96,r*.98,.22,grass,0,.35,0,12);
+
+     // Upper Citadel Terrace
+     box(g,r*1.1,1.0,r*0.85,cream,0,1.0,-1.2);
+     cyl(g,r*0.48,r*0.48,.18,mat('#e0d6c3'),0,1.55,-1.2);
+
+     // Pavlov Bell Tower
+     const belfry=box(g,3.8,2.8,3.4,cream,0,2.8,-1.2);
+     for(const sx of [-1,1]) for(const sz of [-1,1]) cyl(belfry,.24,.24,3.5,gold,sx*1.4,2.2,sz*1.2);
+     const belfryRoof=cone(belfry,2.8,2.0,mat('#ff8f00'),0,5.0,0,4);
      belfryRoof.rotation.y=Math.PI/4;
-     // Pavlov Resonating Bell
-     const bell=cone(g,.55,.65,gold,0,3.3,0);
-     ball(g,.14,dark,0,2.8,0);
+     const bell=cone(belfry,.75,.85,gold,0,2.2,0);
      animated.push({obj:bell,kind:'bell'});
 
-     // Giant Ebbinghaus Crystal Hourglass
-     const hg=new THREE.Group();hg.position.set(-2.0,1.4,1.3);g.add(hg);
-     cone(hg,.5,.65,mat('#80deea',{transparent:true,opacity:.7}),0,.32,0);
-     const hgB=cone(hg,.5,.65,mat('#80deea',{transparent:true,opacity:.7}),0,-.32,0);hgB.rotation.x=Math.PI;
-     ball(hg,.16,warm,0,0,0);
-     box(hg,1.1,.1,1.1,wood,0,.68,0);box(hg,1.1,.1,1.1,wood,0,-.68,0);
+     // Giant Ebbinghaus Sand Hourglass
+     const hg=new THREE.Group(); hg.position.set(-3.8,1.8,2.2); g.add(hg);
+     cone(hg,.7,.9,mat('#80deea',{transparent:true,opacity:.75}),0,.45,0);
+     const hgB=cone(hg,.7,.9,mat('#80deea',{transparent:true,opacity:.75}),0,-.45,0); hgB.rotation.x=Math.PI;
+     ball(hg,.22,warm,0,0,0);
+     box(hg,1.5,.14,1.5,wood,0,.95,0); box(hg,1.5,.14,1.5,wood,0,-.95,0);
      animated.push({obj:hg,kind:'halo'});
 
-     // Skinner Operant Conditioning Box Indicator
-     const skinner=box(g,.8,.7,.8,mat('#455a64'),1.8,1.1,-1.2);
-     cyl(skinner,.04,.04,.4,gold,0,.4,0);
-     ball(skinner,.08,mat('#76ff03'),0,.65,0);
-     book(g,1.9,.7,1.4,mat('#ff9800'));
+     // Skinner Lever Conditioning Pavilion
+     const skinner=box(g,1.4,1.1,1.4,mat('#37474f'),3.8,1.2,2.0);
+     cyl(skinner,.06,.06,.6,gold,0,.6,0);
+     ball(skinner,.14,mat('#76ff03'),0,1.0,0);
+
+     bench(g,2.2,4.2,-0.5);
+     tree(g,-4.5,-3.8,0,1.2);
    }
 
    // -------------------------------------------------------------
-   // Island 03: 理性思維島 (Cognition, Dual-Process & Decision Tree)
-   // Kahneman Fast/Slow Split Canyon & Decision Tree
+   // Island 03: 理性思維島 (Twin-Plateau Rift Canyon - Cognition)
+   // Split canyon: System 1 (Red Crag) vs System 2 (Blue Logic)
    // -------------------------------------------------------------
    else if(i===2){
-     box(g,3.6,.4,2.8,cream,0,.6,0);
-     // System 1 Intuition Crag (Red jagged rocks)
-     box(g,1.2,1.6,1.4,mat('#d32f2f'),-1.4,1.4,0);
-     cone(g,.7,1.8,mat('#f57c00'),-1.4,2.5,0);
-     // System 2 Logic Temple (Blue disciplined cubes)
-     box(g,1.2,1.6,1.4,mat('#1976d2'),1.4,1.4,0);
-     cyl(g,.6,.6,1.8,mat('#0288d1'),1.4,2.5,0,8);
+     cyl(g,r*.95,r*1.1,depth,rock,0,.2-depth/2,0,10);
+     cyl(g,r,r,.25,accents[2],0,.14,0,10);
+     g.userData.land=cyl(g,r*.96,r*.98,.22,grass,0,.35,0,10);
 
-     // Central Branching Decision Tree Structure
-     const treeGroup=new THREE.Group();treeGroup.position.set(0,1.2,-.8);g.add(treeGroup);
-     cyl(treeGroup,.22,.3,2.4,wood,0,1.2,0);
-     for(let b=0;b<4;b++){
-       const ba=b*Math.PI*2/4;
-       const branch=cyl(treeGroup,.1,.14,1.4,wood,Math.sin(ba)*.6,2.2,Math.cos(ba)*.6);
+     // Deep Rift Canyon across the center: Left Red Crag, Right Blue Logic
+     box(g,r*0.42,2.4,r*0.75,mat('#c62828'),-r*0.35,1.55,0); // Left Plateau (Intuition)
+     box(g,r*0.42,2.4,r*0.75,mat('#1565c0'),r*0.35,1.55,0);  // Right Plateau (Logic)
+
+     // Spanning Decision Tree Bridge
+     box(g,r*0.9,.22,2.2,wood,0,2.8,0);
+
+     // Decision Tree rising from the canyon bed
+     const treeGroup=new THREE.Group(); treeGroup.position.set(0,1.4,-3.2); g.add(treeGroup);
+     cyl(treeGroup,.32,.45,3.6,wood,0,1.8,0);
+     for(let b=0; b<6; b++){
+       const ba=b*Math.PI*2/6;
+       const branch=cyl(treeGroup,.15,.2,2.2,wood,Math.sin(ba)*1.0,3.2,Math.cos(ba)*1.0);
        branch.rotation.z=Math.sin(ba)*.5;
        branch.rotation.x=Math.cos(ba)*.5;
-       ball(treeGroup,.28,gold,Math.sin(ba)*1.2,2.8,Math.cos(ba)*1.2);
+       ball(treeGroup,.45,gold,Math.sin(ba)*2.0,4.1,Math.cos(ba)*2.0);
      }
 
-     // Kahneman Dual-Process Balance Scale
-     cyl(g,.18,.22,3.8,wood,0,2.4,.8);
-     const beam=box(g,3.8,.16,.16,mat('#f57c00'),0,4.2,.8);
+     // Kahneman Balance Scale
+     cyl(g,.24,.3,4.6,wood,0,3.0,3.2);
+     const beam=box(g,5.5,.22,.22,mat('#ff9800'),0,5.2,3.2);
      animated.push({obj:beam,kind:'gear'});
-     cyl(g,.02,.02,1.2,dark,-1.5,3.6,.8);
-     ball(g,.45,mat('#ff5252'),-1.5,3.3,.8); // Intuition Feather
-     cyl(g,.02,.02,1.2,dark,1.5,3.6,.8);
-     box(g,.65,.65,.65,mat('#448aff'),1.5,3.3,.8); // Logic Crystal
-     book(g,-.8,1.0,2.1,mat('#f57c00'));
-     book(g,.8,1.0,2.1,mat('#1976d2'));
+     cyl(g,.03,.03,1.8,dark,-2.2,4.4,3.2); ball(g,.65,mat('#ff5252'),-2.2,3.8,3.2);
+     cyl(g,.03,.03,1.8,dark,2.2,4.4,3.2); box(g,.9,.9,.9,mat('#448aff'),2.2,3.8,3.2);
+
+     bench(g,-3.8,4.2,0.4);
+     bench(g,3.8,4.2,-0.4);
    }
 
    // -------------------------------------------------------------
-   // Island 04: 動機與情緒島 (Motivation, Emotion & Maslow)
-   // 5-Tier Maslow Pyramid Terrace & Heart Pulsing Aura
+   // Island 04: 動機與情緒島 (Spiral 5-Tier Pyramid Mountain - Emotion)
+   // Maslow hierarchy spiral terraces ascending to self-actualization
    // -------------------------------------------------------------
    else if(i===3){
-     // 5-Tier Maslow Hierarchy Stepped Pyramid
+     cyl(g,r*.95,r*1.1,depth,rock,0,.2-depth/2,0,10);
+     cyl(g,r,r,.25,accents[3],0,.14,0,10);
+     g.userData.land=cyl(g,r*.96,r*.98,.22,grass,0,.35,0,10);
+
+     // 5 Stepped Terraces (Maslow Hierarchy)
      const pLvls=[
-       {w:3.6,h:.5,c:mat('#d32f2f')}, // Physiological (Red)
-       {w:2.9,h:.5,c:mat('#f57c00')}, // Safety (Orange)
-       {w:2.2,h:.5,c:mat('#fbc02d')}, // Love & Belonging (Yellow)
-       {w:1.5,h:.5,c:mat('#388e3c')}, // Esteem (Green)
-       {w:.9,h:.5,c:mat('#7b1fa2')}   // Self-Actualization (Purple)
+       {w:r*1.2,h:.65,c:mat('#d32f2f')}, // Physiological
+       {w:r*0.95,h:.65,c:mat('#f57c00')}, // Safety
+       {w:r*0.72,h:.65,c:mat('#fbc02d')}, // Love & Belonging
+       {w:r*0.50,h:.65,c:mat('#388e3c')}, // Esteem
+       {w:r*0.30,h:.65,c:mat('#7b1fa2')}  // Self-Actualization
      ];
      let yb=.6;
      for(const lvl of pLvls){
@@ -306,72 +350,85 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
        yb+=lvl.h;
      }
      // Apex Star of Self-Actualization
-     const star=mesh(g,new THREE.OctahedronGeometry(.55,0),gold,0,yb+.4,0);
+     const star=mesh(g,new THREE.OctahedronGeometry(.85,0),gold,0,yb+.55,0);
      animated.push({obj:star,kind:'halo'});
      // Pulsing Emotional Wave Ring
-     const heartRing=torus(g,2.4,.08,warm,0,2.0,0);
+     const heartRing=torus(g,3.8,.12,warm,0,2.8,0);
      animated.push({obj:heartRing,kind:'halo'});
-     // Thermal Motivational Spring
-     cyl(g,.8,.8,.2,mat('#00bcd4'),-2.0,.6,1.4);
-     torus(g,.9,.12,rock,-2.0,.6,1.4);
-     book(g,-1.9,.7,1.5,mat('#e91e63'));
-     bench(g,2.0,1.6);
+
+     // Thermal Springs
+     cyl(g,1.4,1.4,.25,mat('#00e5ff'),-3.6,.6,2.8);
+     torus(g,1.5,.18,rock,-3.6,.6,2.8);
+
+     bench(g,3.8,3.2,-0.6);
+     tree(g,4.5,-3.2,2,1.2);
    }
 
    // -------------------------------------------------------------
-   // Island 05: 人格演繹島 (Personality & Big Five OCEAN)
-   // Pentagonal Star Bastion, 5 Personality Spires & Jungian Mask
+   // Island 05: 人格演繹島 (Pentagram Star Bastion - Big Five OCEAN)
+   // 5 Outstretched star capes pointing towards O-C-E-A-N
    // -------------------------------------------------------------
    else if(i===4){
-     cyl(g,2.6,2.8,.3,cream,0,.55,0,10);
-     // 5 Colored Spires corresponding to O-C-E-A-N
-     const oceanColors=[mat('#00bcd4'),mat('#5c6bc0'),mat('#fbc02d'),mat('#4caf50'),mat('#ab47bc')];
-     for(let k=0;k<5;k++){
+     // 5-Pointed Star Base Geometry
+     cyl(g,r*.95,r*1.15,depth,rock,0,.2-depth/2,0,5);
+     cyl(g,r,r,.25,accents[4],0,.14,0,5);
+     g.userData.land=cyl(g,r*.96,r*.98,.22,grass,0,.35,0,5);
+
+     // 5 Colored Spires corresponding to OCEAN on the 5 Star Points
+     const oceanCols=[mat('#00bcd4'),mat('#5c6bc0'),mat('#fbc02d'),mat('#4caf50'),mat('#ab47bc')];
+     for(let k=0; k<5; k++){
        const a=k*Math.PI*2/5;
-       const px=Math.sin(a)*1.85, pz=Math.cos(a)*1.85;
-       cyl(g,.24,.12,3.5,oceanColors[k],px,2.2,pz);
-       cone(g,.24,.55,warm,px,4.1,pz);
+       const px=Math.sin(a)*r*0.78, pz=Math.cos(a)*r*0.78;
+       cyl(g,.35,.18,4.6,oceanCols[k],px,2.8,pz);
+       cone(g,.38,.85,warm,px,5.4,pz);
+       ball(g,.32,oceanCols[k],px,1.2,pz);
      }
-     // Central Jungian Persona & Shadow Obelisk
-     const jung=mesh(g,new THREE.BoxGeometry(.7,2.8,.7),dark,0,2.0,0);
-     box(jung,.72,.8,.72,cream,0,.6,0); // Light Mask
-     box(jung,.72,.8,.72,mat('#212121'),0,-.6,0); // Shadow
+
+     // Jungian Persona & Shadow Obelisk
+     const jung=mesh(g,new THREE.BoxGeometry(1.1,3.8,1.1),dark,0,2.6,0);
+     box(jung,1.14,1.1,1.14,cream,0,.9,0);
+     box(jung,1.14,1.1,1.14,mat('#1a1a1a'),0,-.9,0);
+
      // Kaleidoscopic Personality Prism
-     const kaleido=mesh(g,new THREE.IcosahedronGeometry(.85,0),gold,0,4.2,0);
+     const kaleido=mesh(g,new THREE.IcosahedronGeometry(1.2,0),gold,0,5.6,0);
      animated.push({obj:kaleido,kind:'halo'});
-     book(g,-1.6,.7,1.8,mat('#ab47bc'));
-     book(g,1.6,.7,1.8,mat('#00bcd4'));
+
+     bench(g,-3.5,3.2,0.5);
+     tree(g,3.8,-3.5,0,1.2);
    }
 
    // -------------------------------------------------------------
-   // Island 06: 社會共振島 (Social Psychology & Influence)
-   // Asch Conformity Lines Colonnade & Empathy Network Nodes
+   // Island 06: 社會共振島 (Concentric Atoll & Agora - Social)
+   // Concentric circular atoll embracing central amphitheater agora
    // -------------------------------------------------------------
    else if(i===5){
-     // Asch Experiment Line Segment Monument (3 varied lines vs standard line)
+     cyl(g,r*.95,r*1.1,depth,rock,0,.2-depth/2,0,12);
+     cyl(g,r,r,.25,accents[5],0,.14,0,12);
+     g.userData.land=cyl(g,r*.96,r*.98,.22,grass,0,.35,0,12);
+
+     // Sunken Agora Amphitheater Rings
+     for(let step=1; step<=3; step++){
+       const rad=r*(0.4+step*0.14);
+       torus(g,rad,.25,cream,0,.5+step*0.25,-0.8);
+     }
+
+     // Asch Conformity Line Segment Columns
      const colMat=[mat('#ff7043'),mat('#26a69a'),gold,mat('#26a69a')];
-     const heights=[2.6,1.6,2.6,3.6];
-     for(let k=0;k<4;k++){
-       const x=-1.6+k*1.05;
-       cyl(g,.20,.20,heights[k],colMat[k],x,.45+heights[k]/2,1.3);
-       ball(g,.16,white,x,.45+heights[k]+.16,1.3);
+     const heights=[3.4,2.2,3.4,4.8];
+     for(let k=0; k<4; k++){
+       const x=-2.4+k*1.6;
+       cyl(g,.28,.28,heights[k],colMat[k],x,.45+heights[k]/2,2.8);
+       ball(g,.24,white,x,.45+heights[k]+.24,2.8);
      }
-     // Concentric Circle Agora of Social Facilitation
-     for(let k=0;k<6;k++){
-       const a=k*Math.PI/3;
-       cyl(g,.16,.16,2.8,cream,Math.sin(a)*1.8,1.9,Math.cos(a)*1.8-.6);
-     }
+
      // Empathy Arch of Prosocial Connection
-     torus(g,1.4,.14,mat('#ec407a'),0,2.8,-.6);
-     book(g,-1.8,.7,1.5,mat('#ff7043'));
-     bench(g,2.0,1.8);
+     torus(g,2.2,.22,mat('#ec407a'),0,3.6,-.8);
+
+     bench(g,-4.0,3.6,0.3);
+     tree(g,4.5,-2.8,0,1.2);
    }
 
    g.children.slice(landmarkStart).forEach(o=>o.traverse(m=>{if(m.isMesh)m.userData.building=data.courses[i].id;}));
-   tree(g,-2.3,-1,i%3,.9);
-   tree(g,2.3,-1,(i+1)%3,.75);
-   lamp(g,-2.6,1.3);
-   lamp(g,2.6,1.3);
  }
 
  const nodes=[...locations].map(([id,g])=>({
@@ -391,7 +448,7 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
 
  const pathMat=mat('#f4dec1');
  for(const n of nodes){
-   const ring=mesh(scene,new THREE.RingGeometry(n.walkRadius-.3,n.walkRadius+.3,72),pathMat,n.x,n.height,n.z);
+   const ring=mesh(scene,new THREE.RingGeometry(n.walkRadius-.4,n.walkRadius+.4,72),pathMat,n.x,n.height,n.z);
    ring.rotation.x=-Math.PI/2;
    walkSurfaces.push(ring);
  }
@@ -402,20 +459,25 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
  pickables.push(...residents.pickables);
 
  // Background islands
- for(const [x,z,r,h] of [[-29,3,2.5,.5],[-13,-28,2.1,1.8],[31,-6,3.1,.35],[0,31,2.7,.9]]){
-   const factor=Math.max(1,mapExtent/27);
-   let g=island(x*factor,z*factor,r,cream,h);
-   tree(g,-.7,0,2,.7);tree(g,.7,-.4,0,.8);
+ for(const [x,z,r,h] of [[-55,10,3.8,.5],[-25,-55,3.2,1.8],[55,-12,4.5,.35],[0,58,4.0,.9]]){
+   const factor=Math.max(1,mapExtent/45);
+   let g=new THREE.Group();
+   g.position.set(x*factor,h,z*factor);
+   cyl(g,r,r*1.1,h+1.5,rock,0,.2-(h+1.5)/2,0,8);
+   cyl(g,r*.98,r*.98,.2,grass,0,.35,0,8);
+   scene.add(g);
+   tree(g,-1.0,0,2,.9);
+   tree(g,1.0,-.6,0,1.0);
  }
 
  const halloween=createDecorations(scene,camera,locations,data.appearance);
  const environment=createSeascape(scene,locations);
 
  const waveMat=mat('#ece1ed');
- for(let i=0;i<45;i++){
-   let x=Math.sin(i*5.13)*37,z=Math.cos(i*2.71)*32;
-   if([...locations.values()].some(g=>Math.hypot(x-g.position.x,z-g.position.z)<6))continue;
-   box(scene,1.1+(i%3)*.4,.015,.055,waveMat,x,-1.2,z);
+ for(let i=0;i<65;i++){
+   let x=Math.sin(i*5.13)*65,z=Math.cos(i*2.71)*58;
+   if([...locations.values()].some(g=>Math.hypot(x-g.position.x,z-g.position.z)<12))continue;
+   box(scene,1.8+(i%3)*.6,.018,.07,waveMat,x,-1.2,z);
  }
 
  function courseNameFor(id){return data.courses.find(c=>c.id===id)?.name||data.center.name;}
@@ -432,12 +494,12 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
    const plate=document.createElement('span');
    plate.className='island-name-plate';
    const number=document.createElement('b');
-   number.textContent=id==='center'?'✦':String(course.order).padStart(2,'0');
+   number.textContent=id==='center'?'Ψ':String(course.order).padStart(2,'0');
    plate.append(number,document.createTextNode(id==='center'?data.center.name:course.name));
    button.append(plate);
    button.addEventListener('click',e=>{e.stopPropagation();focusIsland(id);});
    const object=new CSS2DObject(button);
-   object.position.set(0,id==='center'?10.2:[7,7.4,7,7.5,6.8,8.2,6.4][data.courses.findIndex(c=>c.id===id)%7],0);
+   object.position.set(0,id==='center'?14.2:[9.5,10.2,9.8,10.5,9.2,11.2,8.8][data.courses.findIndex(c=>c.id===id)%7],0);
    g.add(object);
    labels.push({id,object,button});
  }
@@ -446,11 +508,11 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
    const button=document.createElement('button');
    button.className='building-label';
    button.dataset.building=id;
-   button.innerHTML=id==='center'?'<span>進入書房 ✦</span>':'<span>教材 ✦</span>';
-   button.setAttribute('aria-label',id==='center'?'點選中央島建築進入3D書房':'點選島建築閱讀該課教材');
+   button.innerHTML=id==='center'?'<span>進入備課室 ✦</span>':'<span>教材 ✦</span>';
+   button.setAttribute('aria-label',id==='center'?'點選中央島建築進入張春興教授備課室':'點選島建築閱讀該課教材');
    button.addEventListener('click',e=>{e.stopPropagation();enterBuilding(id);});
    const object=new CSS2DObject(button);
-   object.position.set(0,id==='center'?10.2:[7,7.4,7,7.5,6.8,8.2,6.4][data.courses.findIndex(c=>c.id===id)%7],0);
+   object.position.set(0,id==='center'?14.2:[9.5,10.2,9.8,10.5,9.2,11.2,8.8][data.courses.findIndex(c=>c.id===id)%7],0);
    g.add(object);
    buildingLabels.push({id,object,button});
  }
@@ -460,8 +522,7 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
  // =========================================================================
  const promptOverlay = document.createElement('div');
  promptOverlay.className = 'player-prompt-hud';
- promptOverlay.style.cssText = 'position:absolute;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(28,27,32,0.85);backdrop-filter:blur(8px);color:#fff;padding:8px 18px;border-radius:24px;font-size:13px;pointer-events:none;z-index:90;display:flex;align-items:center;gap:12px;box-shadow:0 6px 18px rgba(0,0,0,0.22);border:1px solid rgba(255,255,255,0.18);transition:opacity 0.2s;';
- promptOverlay.innerHTML = '<span class="prompt-icon">🎮</span><span class="prompt-text"><b>[WASD / 箭頭方向鍵]</b> 操控張春興教授 ｜ <b>[C]</b> 切換跟隨視角 ｜ <b>[空白鍵]</b> 跳躍 ｜ 點擊地面亦可移動</span>';
+ promptOverlay.innerHTML = '<span class="prompt-icon">🎮</span><span class="prompt-text"><b>[方向鍵 / 觸控]</b> 操控探索 ｜ <b>[C]</b> 角色視角 ｜ <b>[空白鍵]</b> 跳躍 ｜ 點擊地面亦可移動</span>';
  host.appendChild(promptOverlay);
 
  const controller = createCharacterController(scene, network, locations, camera, controls, {
@@ -477,10 +538,11 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
        const name = isCenter ? data.center.name : courseNameFor(prox.landmark);
        promptOverlay.innerHTML = `<span class="prompt-icon">📖</span><span class="prompt-text">按 <b>[E]</b> 或 <b>[Enter]</b> 探索 <b>${name}</b> 教材</span>`;
      } else {
-       promptOverlay.innerHTML = '<span class="prompt-icon">🎮</span><span class="prompt-text"><b>[WASD]</b> 操控探索 ｜ <b>[Shift]</b> 衝刺 ｜ <b>[空白鍵]</b> 跳躍 ｜ <b>[C]</b> 切換跟隨視角 ｜ 點擊地面移動</span>';
+       promptOverlay.innerHTML = '<span class="prompt-icon">🎮</span><span class="prompt-text"><b>[方向鍵 / 觸控]</b> 操控探索 ｜ <b>[Shift]</b> 衝刺 ｜ <b>[空白鍵]</b> 跳躍 ｜ <b>[C]</b> 角色視角 ｜ 點擊地面移動</span>';
      }
    }
  });
+ controller.setResidentsCache(residents.snapshot());
 
  let reduced=false,frame=null,flight=null,selected=null,light='day',theme='morning',elapsed=0,last=0,rendering=false,shadowElapsed=0,labelThrottle=0,lastSelectedForLabel=null;
  let layoutKey='',overviewNeedsSpace='fit';
@@ -516,7 +578,7 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
    for(const l of entries){
      const position=l.actor.g.position;
      const isHost=l.button.dataset.hostIsland;
-     const near= Math.hypot(position.x-selectedIsland.position.x,position.z-selectedIsland.position.z)<selectedIsland.userData.radius+.7;
+     const near= Math.hypot(position.x-selectedIsland.position.x,position.z-selectedIsland.position.z)<selectedIsland.userData.radius+.8;
      if((isHost&&isHost!==selected)||!near){l.button.style.visibility='hidden';continue;}
      const p=l.object.getWorldPosition(new THREE.Vector3()).project(camera),rawX=(p.x+1)*w/2,rawY=(-p.y+1)*h/2;
      const bw=l.button.offsetWidth,bh=l.button.offsetHeight;
@@ -559,16 +621,15 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
    if(!reduced&&!flight){
      elapsed+=dt;
      shadowElapsed+=dt;
-     if(shadowElapsed>.8){
+     if(shadowElapsed>1.2){
        renderer.shadowMap.needsUpdate=true;
        shadowElapsed=0;
      }
 
-     // Update Player Controller
      controller.update(dt);
-
      residents.update(dt);
      controller.setResidentsCache(residents.snapshot());
+
      halloween.update(dt);
      environment.update(dt);
 
@@ -614,6 +675,8 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
    halloween.faceCamera();
    renderer.render(scene,camera);
    labelRenderer.render(scene,camera);
+
+   // Throttled Label & Layout calculations to guarantee smooth 60fps!
    labelThrottle += dt;
    if (labelThrottle > 0.08 || flight || selected !== lastSelectedForLabel) {
      labelThrottle = 0;
@@ -673,7 +736,7 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
  }
 
  function bestOverview(){
-   const target=new THREE.Vector3(0,3,0),preview=camera.clone();
+   const target=new THREE.Vector3(0,3.8,0),preview=camera.clone();
    preview.position.copy(target).add(cameraOffset.clone());
    preview.zoom=1;
    preview.lookAt(target);
@@ -749,7 +812,6 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
      onHost?.();
    }else if(hit){
      const id=hit.object.userData.island;
-     // Click to move player directly to the point on the island ground
      if(hit.point){
        controller.moveTo(hit.point.x, hit.point.z);
        invalidate();
@@ -773,8 +835,8 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
    labels.forEach(l=>l.button.classList.toggle('selected',l.id===id));
    onFocus?.(id);
    const phone=host.clientWidth<500,target=g.position.clone();
-   target.y+=id==='center'?1.5:1;
-   const zoom=(camera.right-camera.left)*(id==='center'?(phone?.72:.36):(phone?.82:.46))/(g.userData.radius*2);
+   target.y+=id==='center'?2.2:1.4;
+   const zoom=(camera.right-camera.left)*(id==='center'?(phone?.65:.34):(phone?.75:.42))/(g.userData.radius*2);
    fly(target,Math.min(controls.maxZoom,zoom));
    requestAnimationFrame(()=>{
      if(selected===id&&!document.querySelector('#panel:not([hidden]),dialog[open]'))
@@ -804,11 +866,11 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
      renderer.shadowMap.needsUpdate=true;
      light=v;
      const night=v==='night';
-     ambient.intensity=night?1.65:v==='dusk'?1.8:1.9;
-     sun.intensity=night?.7:v==='dusk'?1.6:2.5;
-     sun.color.set(night?'#dec8f1':v==='dusk'?'#ffd39b':'#fff0dd');
-     sun.position.set(night?-25:-30,night?35:55,v==='dusk'?-20:22);
-     warm.emissiveIntensity=night?2.8:v==='dusk'?1.1:.15;
+     ambient.intensity=night?1.65:v==='dusk'?1.8:2.1;
+     sun.intensity=night?.7:v==='dusk'?1.6:2.6;
+     sun.color.set(night?'#dec8f1':v==='dusk'?'#ffd39b':'#fffbf2');
+     sun.position.set(night?-35:-45,night?50:85,v==='dusk'?-25:35);
+     warm.emissiveIntensity=night?2.8:v==='dusk'?1.1:.18;
      halloween.setLighting(v);
      environment.setLighting(v);
      invalidate();
@@ -869,7 +931,7 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
      for(const [key,point]of [[p.from,p.points[0]],[p.to,p.points.at(-1)]]){
        const g=locations.get(network.vertices[key].island),dx=p.points.at(-1).x-p.points[0].x,dz=p.points.at(-1).z-p.points[0].z,len=p.length;
        let hits=0;
-       for(const width of [-(p.width||1.2)*.45,0,(p.width||1.2)*.45]){
+       for(const width of [-(p.width||1.8)*.45,0,(p.width||1.8)*.45]){
          ray.set(new THREE.Vector3(point.x+dz/Math.hypot(dx,dz)*width,30,point.z-dx/Math.hypot(dx,dz)*width),down);
          if(ray.intersectObject(g.userData.land,false).length)hits++;
        }
@@ -880,12 +942,12 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
    let supported=0,samples=0;const gaps=[];
    const surfaces=[...walkSurfaces,...[...locations.values()].map(g=>g.userData.land)];
    for(const p of network.paths){
-     for(let d=0;d<=p.length;d+=.35){
+     for(let d=0;d<=p.length;d+=.45){
        const pt=pointAt(p,d).point;
        ray.set(new THREE.Vector3(pt.x,30,pt.z),down);
        samples++;
        const hit=ray.intersectObjects(surfaces,false)[0];
-       if(hit&&Math.abs(hit.point.y-pt.y)<.32)supported++;
+       if(hit&&Math.abs(hit.point.y-pt.y)<.42)supported++;
        else gaps.push({path:p.style?.id||p.island,point:pt,surfaceY:hit?.point.y});
      }
    }
