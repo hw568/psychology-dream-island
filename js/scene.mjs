@@ -1,5 +1,5 @@
 import {createInterior} from './interior.mjs';
-import {fitOverview,placeOverviewLabels,projectIslandBounds} from './overview-labels.mjs';
+import {fitOverview,projectIslandBounds} from './overview-labels.mjs';
 import {createSeascape} from './seascape.mjs';
 import {layoutFor,bridgeStylesFor,connectionsFor} from './world.mjs';
 import {createBridges} from './bridges.mjs';
@@ -10,7 +10,6 @@ import {OrbitControls} from '../vendor/OrbitControls.js';
 import {CSS2DRenderer,CSS2DObject} from '../vendor/CSS2DRenderer.js';
 import {buildNetwork,pointAt} from './navigation.mjs';
 import {createResidents} from './residents.mjs';
-import {createCharacterController} from './character-controller.mjs';
 import {createPhilosopherBoats} from './philosopher-boats.mjs';
 
 export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFocus,onPersonalKnowledge}){
@@ -56,8 +55,8 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
  controls.enablePan=false;
  controls.enableDamping=true;
  controls.dampingFactor=.08;
- controls.minZoom=0.12;  // High-altitude panoramic map view
- controls.maxZoom=48.0;  // Close-up character inspection view
+ controls.minZoom=0.35;
+ controls.maxZoom=4.8;
  controls.minPolarAngle=.18;
  controls.maxPolarAngle=Math.PI/2.4;
  controls.target.set(0,3.8,0);
@@ -613,36 +612,6 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
    buildingLabels.push({id,object,button});
  }
 
- // =========================================================================
- // 3. CHARACTER CONTROLLER (張春興教授 + 小白狗可操控系統)
- // =========================================================================
- const promptOverlay = document.createElement('div');
- promptOverlay.className = 'player-prompt-hud';
- promptOverlay.innerHTML = '<span class="prompt-icon">🎮</span><span class="prompt-text"><b>[方向鍵/觸控]</b> 操控探索 ｜ <b>[Z/滾輪]</b> 鏡頭特寫 ｜ <b>[C]</b> 角色視角 ｜ <b>[空白鍵]</b> 跳躍</span>';
- host.appendChild(promptOverlay);
-
- const controller = createCharacterController(scene, network, locations, camera, controls, {
-   hostElement: host,
-   onSelectCourse: onSelect,
-   onOpenResident: onResident,
-   onOpenHost: onHost,
-   onOpenPersonalKnowledge: onPersonalKnowledge,
-   onProximityChange: (prox) => {
-     if (prox.landmark === 'island-personal' || prox.resident?.id === 'guide-sisi') {
-       promptOverlay.innerHTML = '<span class="prompt-icon">🌟</span><span class="prompt-text">按 <b>[E]</b> 或 <b>[Enter]</b> 打開 <b>個人學習知識寶庫</b> ｜ <b>[Z/滾輪]</b> 特寫</span>';
-     } else if (prox.resident) {
-       promptOverlay.innerHTML = `<span class="prompt-icon">💬</span><span class="prompt-text">按 <b>[E]</b> 或 <b>[Enter]</b> 與 <b>${prox.resident.name}</b> 交談 ｜ <b>[Z/滾輪]</b> 特寫</span>`;
-     } else if (prox.landmark) {
-       const isCenter = prox.landmark === 'center';
-       const name = isCenter ? data.center.name : courseNameFor(prox.landmark);
-       promptOverlay.innerHTML = `<span class="prompt-icon">📖</span><span class="prompt-text">按 <b>[E]</b> 或 <b>[Enter]</b> 探索 <b>${name}</b> ｜ <b>[Z/滾輪]</b> 特寫</span>`;
-     } else {
-       promptOverlay.innerHTML = '<span class="prompt-icon">🎮</span><span class="prompt-text"><b>[方向鍵/觸控]</b> 操控探索 ｜ <b>[Shift]</b> 衝刺 ｜ <b>[Z/滾輪]</b> 鏡頭特寫 ｜ <b>[C]</b> 角色視角</span>';
-     }
-   }
- });
- controller.setResidentsCache(residents.snapshot());
-
  let reduced=false,frame=null,flight=null,selected=null,light='day',theme='morning',elapsed=0,last=0,rendering=false,shadowElapsed=0,labelThrottle=0,lastSelectedForLabel=null;
  let layoutKey='',overviewNeedsSpace='fit';
 
@@ -654,7 +623,7 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
        leaders.replaceChildren();
        layoutKey=selected;
      }
-     placeOverviewLabels(camera,locations,buildingLabels.filter(l=>l.id===selected),host.clientWidth,host.clientHeight);
+     
    }
  }
 
@@ -725,10 +694,8 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
        shadowElapsed=0;
      }
 
-     controller.update(dt);
      residents.update(dt);
      philosopherBoats.update(dt);
-     controller.setResidentsCache(residents.snapshot());
 
      halloween.update(dt);
      environment.update(dt);
@@ -757,11 +724,9 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
      }
    }
 
-   if(!controller.state.cameraFollow) {
-     controls.update();
-   }
+   controls.update();
 
-   if(!selected&&!flight&&overviewNeedsSpace&&!controller.state.cameraFollow){
+   if(!selected&&!flight&&overviewNeedsSpace){
      fitOverview(camera,controls,locations,host.clientWidth,host.clientHeight);
      if(overviewNeedsSpace==='fit')fitOverview(camera,controls,locations,host.clientWidth,host.clientHeight,true);
      else{
@@ -786,7 +751,7 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
    }
 
    rendering=false;
-   if(!reduced||flight||controller.state.isMoving||controller.state.cameraFollow)frame=requestAnimationFrame(render);
+   if(!reduced||flight)frame=requestAnimationFrame(render);
  }
 
  function invalidate(){
@@ -865,11 +830,10 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
 
  function leaveInterior(){
    interior.leave();
-   controls.enabled=!controller.state.cameraFollow;
+   controls.enabled=true;
    labelRenderer.domElement.hidden=false;
    leaders.style.display='';
-   promptOverlay.style.display='';
-   onFocus?.('center');
+      onFocus?.('center');
    invalidate();
  }
 
@@ -881,8 +845,7 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
    flight=null;
    labelRenderer.domElement.hidden=true;
    leaders.style.display='none';
-   promptOverlay.style.display='none';
-   onFocus?.('interior');
+      onFocus?.('interior');
    invalidate();
  }
 
@@ -915,13 +878,11 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
      onHost?.();
    }else if(hit){
      const id=hit.object.userData.island;
-     if(hit.point){
-       controller.moveTo(hit.point.x, hit.point.z);
-       invalidate();
-     }
-     if(selected===id&&hit.object.userData.building===id)enterBuilding(id);
-     else focusIsland(id);
-   }
+      if(selected===id&&hit.object.userData.building===id)enterBuilding(id);
+      else focusIsland(id);
+    }else if(selected){
+      overview();
+    }
  });
 
  renderer.domElement.addEventListener('webglcontextlost',e=>{
@@ -955,8 +916,7 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
    select(id){
      if(interior.active&&id==='center')return;
      focusIsland(id);
-     controller.teleportTo(id);
-   },
+     },
    setTheme(t){
      theme=t;layoutKey='';
      const color=t==='night'?palette.night:t==='mist'?palette.mist:palette.water;
@@ -997,18 +957,10 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
      invalidate();
    },
    inspectWalkways,
-   controller,
-   cycleZoom: () => {
-     const dist = controller.cycleZoom();
-     invalidate();
-     return dist;
-   },
+   
    openPersonalKnowledge: () => onPersonalKnowledge?.(),
-   toggleFollowMode: () => {
-     const isFollow = controller.toggleCameraFollow();
-     invalidate();
-     return isFollow;
-   },
+    openPhilosopher: (id) => philosopherBoats.openDialog(id),
+   
    getDiagnostics(){
      return {
        transition:flight?.kind||null,
@@ -1019,12 +971,6 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
        residents:residents.snapshot(),
        hosts:residents.hostSnapshot(),
        selected,
-       player: {
-         x: controller.state.x,
-         y: controller.state.y,
-         z: controller.state.z,
-         followCam: controller.state.cameraFollow
-       },
        theme,
        light,
        zoom:camera.zoom
