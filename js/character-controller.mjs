@@ -6,7 +6,8 @@ export function createCharacterController(scene, network, locations, camera, con
     onSelectCourse,
     onOpenResident,
     onOpenHost,
-    onProximityChange
+    onProximityChange,
+    hostElement = document.body
   } = options;
 
   // 1. Create Player (Prof. Chun-Hsing Chang)
@@ -39,12 +40,12 @@ export function createCharacterController(scene, network, locations, camera, con
     z: startZ,
     angle: 0,
     speed: 0,
-    walkSpeed: 4.8,
-    runSpeed: 8.5,
-    rotSpeed: 3.8,
+    walkSpeed: 5.2,
+    runSpeed: 9.0,
+    rotSpeed: 4.2,
     isGrounded: true,
     jumpVelocity: 0,
-    gravity: -19.6,
+    gravity: -20,
     isMoving: false,
     isRunning: false,
     cameraFollow: false, // Third-person camera follow mode
@@ -61,9 +62,11 @@ export function createCharacterController(scene, network, locations, camera, con
     left: false,
     right: false,
     sprint: false,
-    jump: false,
-    interact: false
+    jump: false
   };
+
+  // Touch Direction Vector (-1 to 1)
+  const touchDir = { x: 0, z: 0, active: false };
 
   function onKeyDown(e) {
     if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
@@ -94,10 +97,7 @@ export function createCharacterController(scene, network, locations, camera, con
         keys.sprint = true;
         break;
       case 'Space':
-        if (state.isGrounded) {
-          state.jumpVelocity = 6.2;
-          state.isGrounded = false;
-        }
+        jump();
         e.preventDefault();
         break;
       case 'KeyE':
@@ -135,8 +135,67 @@ export function createCharacterController(scene, network, locations, camera, con
     }
   }
 
+  function jump() {
+    if (state.isGrounded) {
+      state.jumpVelocity = 6.4;
+      state.isGrounded = false;
+    }
+  }
+
   window.addEventListener('keydown', onKeyDown);
   window.addEventListener('keyup', onKeyUp);
+
+  // =========================================================
+  // 3. Touch Virtual Controls (觸控虛擬方向盤 & 互動鈕)
+  // =========================================================
+  const touchUI = document.createElement('div');
+  touchUI.className = 'touch-controls-hud';
+  touchUI.innerHTML = `
+    <div class="touch-dpad" id="touch-dpad" aria-label="觸控方向鍵">
+      <button class="dpad-btn up" data-dir="up" aria-label="向前走">▲</button>
+      <button class="dpad-btn left" data-dir="left" aria-label="向左轉">◀</button>
+      <button class="dpad-btn down" data-dir="down" aria-label="向後退">▼</button>
+      <button class="dpad-btn right" data-dir="right" aria-label="向右轉">▶</button>
+      <div class="dpad-center" id="dpad-center">●</div>
+    </div>
+    <div class="touch-actions">
+      <button class="touch-action-btn jump-btn" id="touch-jump" aria-label="跳躍">跳躍</button>
+      <button class="touch-action-btn interact-btn" id="touch-interact" aria-label="互動">交談</button>
+    </div>
+  `;
+  hostElement.appendChild(touchUI);
+
+  // Bind D-pad touch events
+  const dpad = touchUI.querySelector('#touch-dpad');
+  function handleDpad(e) {
+    const btn = e.target.closest('.dpad-btn');
+    if (!btn) return;
+    const dir = btn.dataset.dir;
+    if (dir === 'up') keys.forward = true;
+    if (dir === 'down') keys.backward = true;
+    if (dir === 'left') keys.left = true;
+    if (dir === 'right') keys.right = true;
+    state.activeTarget = null;
+  }
+  function clearDpad() {
+    keys.forward = false;
+    keys.backward = false;
+    keys.left = false;
+    keys.right = false;
+  }
+
+  dpad.addEventListener('pointerdown', e => { e.preventDefault(); handleDpad(e); });
+  dpad.addEventListener('pointerup', clearDpad);
+  dpad.addEventListener('pointerleave', clearDpad);
+
+  touchUI.querySelector('#touch-jump').addEventListener('pointerdown', e => {
+    e.preventDefault();
+    jump();
+  });
+  touchUI.querySelector('#touch-interact').addEventListener('pointerdown', e => {
+    e.preventDefault();
+    triggerInteraction();
+  });
 
   // Trigger Interaction when nearby
   function triggerInteraction() {
@@ -150,36 +209,30 @@ export function createCharacterController(scene, network, locations, camera, con
   // Toggle Camera Follow
   function toggleCameraFollow(forced) {
     state.cameraFollow = forced !== undefined ? forced : !state.cameraFollow;
-    if (state.cameraFollow) {
-      controls.enabled = false;
-    } else {
-      controls.enabled = true;
-    }
+    controls.enabled = !state.cameraFollow;
     return state.cameraFollow;
   }
 
-  // Move directly towards coordinate (click-to-move)
+  // Move directly towards coordinate (click-to-move / touch-to-move)
   function moveTo(targetX, targetZ) {
     state.activeTarget = { x: targetX, z: targetZ };
   }
 
   // Ground detection / clamping to islands or bridges
   function getGroundHeight(x, z) {
-    // 1. Check all island circles
     for (const node of network.nodes) {
       const d = Math.hypot(x - node.x, z - node.z);
       if (d <= node.radius * 1.05) {
         return { y: node.height ?? node.elevation + 0.49, island: node.id };
       }
     }
-    // 2. Check bridges
     for (const path of network.paths) {
       if (path.kind === 'bridge' && path.points) {
         for (let i = 0; i < path.points.length - 1; i++) {
           const p1 = path.points[i];
           const p2 = path.points[i + 1];
           const dist = distToSegment(x, z, p1.x, p1.z, p2.x, p2.z);
-          if (dist < 1.4) {
+          if (dist < 1.45) {
             const t = Math.max(0, Math.min(1, projectionFactor(x, z, p1.x, p1.z, p2.x, p2.z)));
             const bridgeY = p1.y + (p2.y - p1.y) * t + 0.35;
             return { y: bridgeY, island: path.fromIsland || 'bridge' };
@@ -187,7 +240,7 @@ export function createCharacterController(scene, network, locations, camera, con
         }
       }
     }
-    return null; // Over water
+    return null;
   }
 
   function distToSegment(px, pz, x1, z1, x2, z2) {
@@ -204,7 +257,12 @@ export function createCharacterController(scene, network, locations, camera, con
     return ((px - x1) * (x2 - x1) + (pz - z1) * (z2 - z1)) / l2;
   }
 
-  // Puppy follow animation physics
+  // Pre-cached residents list to eliminate scene.traverse CPU lag!
+  let cachedResidents = [];
+  function setResidentsCache(list) {
+    cachedResidents = list;
+  }
+
   const puppyState = {
     x: startX - 0.6,
     y: startY,
@@ -212,15 +270,16 @@ export function createCharacterController(scene, network, locations, camera, con
     angle: 0
   };
 
-  // Main Update Loop
   let timeElapsed = 0;
+  let proximityCheckTimer = 0;
+
   function update(dt) {
     timeElapsed += dt;
 
     let moveX = 0;
     let moveZ = 0;
 
-    // A. Keyboard Input
+    // A. Keyboard / D-pad Input
     if (keys.forward) moveZ -= 1;
     if (keys.backward) moveZ += 1;
     if (keys.left) moveX -= 1;
@@ -231,7 +290,7 @@ export function createCharacterController(scene, network, locations, camera, con
       const dx = state.activeTarget.x - state.x;
       const dz = state.activeTarget.z - state.z;
       const dist = Math.hypot(dx, dz);
-      if (dist > 0.3) {
+      if (dist > 0.25) {
         moveX = dx / dist;
         moveZ = dz / dist;
       } else {
@@ -239,7 +298,6 @@ export function createCharacterController(scene, network, locations, camera, con
       }
     }
 
-    // Normalizing movement vector
     const moveLen = Math.hypot(moveX, moveZ);
     state.isMoving = moveLen > 0.05;
     state.isRunning = keys.sprint && state.isMoving;
@@ -248,17 +306,14 @@ export function createCharacterController(scene, network, locations, camera, con
 
     if (state.isMoving) {
       const targetAngle = Math.atan2(moveX, moveZ);
-      // Smooth angle interpolation
       let angleDiff = targetAngle - state.angle;
       while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
       while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
-      state.angle += angleDiff * Math.min(1, dt * 14);
+      state.angle += angleDiff * Math.min(1, dt * 16);
 
-      // Next candidate position
       const nextX = state.x + Math.sin(state.angle) * currentSpeed;
       const nextZ = state.z + Math.cos(state.angle) * currentSpeed;
 
-      // Validate ground candidate
       const ground = getGroundHeight(nextX, nextZ);
       if (ground) {
         state.x = nextX;
@@ -270,7 +325,7 @@ export function createCharacterController(scene, network, locations, camera, con
       }
     }
 
-    // Jump / Gravity Physics
+    // Jump Physics
     if (!state.isGrounded) {
       state.jumpVelocity += state.gravity * dt;
       state.y += state.jumpVelocity * dt;
@@ -284,18 +339,14 @@ export function createCharacterController(scene, network, locations, camera, con
       }
     }
 
-    // Update Player Mesh Position & Rotation
     player.g.position.set(state.x, state.y, state.z);
     player.g.rotation.y = state.angle;
 
-    // Animate Professor Chang (walking/idling)
+    // Animate Professor Chang
     animateCharacter(player, timeElapsed, 1.0, state.isMoving, state.isRunning);
 
-    // ==========================================
-    // C. Puppy Companion Following Physics
-    // ==========================================
+    // Animate Puppy Companion
     if (puppyObj) {
-      // Puppy target is slightly behind player's left side
       const pupTargetX = state.x - Math.sin(state.angle) * 0.55 - Math.cos(state.angle) * 0.45;
       const pupTargetZ = state.z - Math.cos(state.angle) * 0.55 + Math.sin(state.angle) * 0.45;
 
@@ -303,11 +354,10 @@ export function createCharacterController(scene, network, locations, camera, con
       const pupDz = pupTargetZ - puppyState.z;
       const pupDist = Math.hypot(pupDx, pupDz);
 
-      const pupMoving = pupDist > 0.25;
+      const pupMoving = pupDist > 0.22;
       if (pupMoving) {
-        const pupAngle = Math.atan2(pupDx, pupDz);
-        puppyState.angle = pupAngle;
-        const pupSpeed = (state.isRunning ? 9.5 : 5.5) * dt;
+        puppyState.angle = Math.atan2(pupDx, pupDz);
+        const pupSpeed = (state.isRunning ? 10.0 : 6.0) * dt;
         puppyState.x += (pupDx / pupDist) * Math.min(pupDist, pupSpeed);
         puppyState.z += (pupDz / pupDist) * Math.min(pupDist, pupSpeed);
       }
@@ -321,46 +371,43 @@ export function createCharacterController(scene, network, locations, camera, con
       animatePuppy(puppyObj, timeElapsed, pupMoving, state.isRunning);
     }
 
-    // ==========================================
-    // D. Proximity Detection (Residents & Landmarks)
-    // ==========================================
-    let foundResident = null;
-    let foundLandmark = null;
+    // =========================================================
+    // Optimized Proximity Check (Runs every 0.1s, NO scene.traverse!)
+    // =========================================================
+    proximityCheckTimer += dt;
+    if (proximityCheckTimer > 0.1) {
+      proximityCheckTimer = 0;
+      let foundResident = null;
+      let foundLandmark = null;
 
-    // Check residents in scene
-    scene.traverse(obj => {
-      if (obj.userData?.resident && !foundResident) {
-        const worldPos = new THREE.Vector3();
-        obj.getWorldPosition(worldPos);
-        const dist = Math.hypot(worldPos.x - state.x, worldPos.z - state.z);
-        if (dist < 2.4) {
-          foundResident = { id: obj.userData.resident, name: obj.userData.residentName || '島民' };
+      for (const res of cachedResidents) {
+        const d = Math.hypot(res.x - state.x, res.z - state.z);
+        if (d < 2.5) {
+          foundResident = { id: res.id, name: res.name };
+          break;
         }
       }
-    });
 
-    // Check island centers
-    for (const [id, g] of locations) {
-      const dist = Math.hypot(g.position.x - state.x, g.position.z - state.z);
-      if (dist < 2.8) {
-        foundLandmark = id;
-        break;
+      for (const [id, g] of locations) {
+        const d = Math.hypot(g.position.x - state.x, g.position.z - state.z);
+        if (d < 2.8) {
+          foundLandmark = id;
+          break;
+        }
+      }
+
+      if (foundResident !== state.nearbyResident || foundLandmark !== state.nearbyLandmark) {
+        state.nearbyResident = foundResident;
+        state.nearbyLandmark = foundLandmark;
+        onProximityChange?.({
+          resident: state.nearbyResident,
+          landmark: state.nearbyLandmark,
+          island: state.currentIsland
+        });
       }
     }
 
-    if (foundResident !== state.nearbyResident || foundLandmark !== state.nearbyLandmark) {
-      state.nearbyResident = foundResident;
-      state.nearbyLandmark = foundLandmark;
-      onProximityChange?.({
-        resident: state.nearbyResident,
-        landmark: state.nearbyLandmark,
-        island: state.currentIsland
-      });
-    }
-
-    // ==========================================
-    // E. Camera Follow Mode (Third-person view)
-    // ==========================================
+    // Third-person camera follow mode
     if (state.cameraFollow) {
       const camDist = 18;
       const camHeight = 14;
@@ -368,12 +415,11 @@ export function createCharacterController(scene, network, locations, camera, con
       const targetCamZ = state.z - Math.cos(state.angle) * camDist;
       const targetCamY = state.y + camHeight;
 
-      camera.position.x += (targetCamX - camera.position.x) * dt * 4;
-      camera.position.y += (targetCamY - camera.position.y) * dt * 4;
-      camera.position.z += (targetCamZ - camera.position.z) * dt * 4;
+      camera.position.x += (targetCamX - camera.position.x) * dt * 5;
+      camera.position.y += (targetCamY - camera.position.y) * dt * 5;
+      camera.position.z += (targetCamZ - camera.position.z) * dt * 5;
 
-      const lookTarget = new THREE.Vector3(state.x, state.y + 1.2, state.z);
-      camera.lookAt(lookTarget);
+      camera.lookAt(state.x, state.y + 1.2, state.z);
     }
   }
 
@@ -396,6 +442,7 @@ export function createCharacterController(scene, network, locations, camera, con
   function dispose() {
     window.removeEventListener('keydown', onKeyDown);
     window.removeEventListener('keyup', onKeyUp);
+    touchUI.remove();
   }
 
   return {
@@ -407,6 +454,7 @@ export function createCharacterController(scene, network, locations, camera, con
     teleportTo,
     toggleCameraFollow,
     triggerInteraction,
+    setResidentsCache,
     dispose
   };
 }

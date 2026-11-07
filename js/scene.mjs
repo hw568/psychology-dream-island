@@ -152,8 +152,19 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
  cyl(center,1.1,1.1,.25,teal,0,6.7);
  const halo=torus(center,1.4,.08,gold,0,7.8,0);
  animated.push({obj:halo,kind:'halo'});
- const mindCrystal=mesh(center,new THREE.OctahedronGeometry(.5,0),warm,0,7.8,0);
- animated.push({obj:mindCrystal,kind:'halo'});
+
+ // 3D Psychology Symbol: Greek Letter Psi (Ψ) Monument
+ const psiGroup=new THREE.Group();
+ psiGroup.position.set(0,8.3,0);
+ center.add(psiGroup);
+ cyl(psiGroup,.14,.14,2.2,gold,0,0,0);
+ const psiArmL=torus(psiGroup,.72,.09,gold,-.45,.25,0);psiArmL.rotation.z=Math.PI/4;
+ const psiArmR=torus(psiGroup,.72,.09,gold,.45,.25,0);psiArmR.rotation.z=-Math.PI/4;
+ box(psiGroup,.32,.12,.14,gold,-.95,.8,0);
+ box(psiGroup,.32,.12,.14,gold,.95,.8,0);
+ box(psiGroup,.32,.12,.14,gold,0,1.15,0);
+ ball(psiGroup,.24,warm,0,1.35,0);
+ animated.push({obj:psiGroup,kind:'halo'});
 
  // Monumental Textbook of Psychology: 《現代心理學》
  book(center,-2.0,.7,1.8,mat('#8b1e1b'));
@@ -454,6 +465,7 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
  host.appendChild(promptOverlay);
 
  const controller = createCharacterController(scene, network, locations, camera, controls, {
+   hostElement: host,
    onSelectCourse: onSelect,
    onOpenResident: onResident,
    onOpenHost: onHost,
@@ -470,7 +482,7 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
    }
  });
 
- let reduced=false,frame=null,flight=null,selected=null,light='day',theme='morning',elapsed=0,last=0,rendering=false,shadowElapsed=0;
+ let reduced=false,frame=null,flight=null,selected=null,light='day',theme='morning',elapsed=0,last=0,rendering=false,shadowElapsed=0,labelThrottle=0,lastSelectedForLabel=null;
  let layoutKey='',overviewNeedsSpace='fit';
 
  function layoutLabels(){
@@ -556,6 +568,7 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
      controller.update(dt);
 
      residents.update(dt);
+     controller.setResidentsCache(residents.snapshot());
      halloween.update(dt);
      environment.update(dt);
 
@@ -601,8 +614,13 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
    halloween.faceCamera();
    renderer.render(scene,camera);
    labelRenderer.render(scene,camera);
-   layoutLabels();
-   layoutPeople();
+   labelThrottle += dt;
+   if (labelThrottle > 0.08 || flight || selected !== lastSelectedForLabel) {
+     labelThrottle = 0;
+     lastSelectedForLabel = selected;
+     layoutLabels();
+     layoutPeople();
+   }
 
    rendering=false;
    if(!reduced||flight||controller.state.isMoving||controller.state.cameraFollow)frame=requestAnimationFrame(render);
