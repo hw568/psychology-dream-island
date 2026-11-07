@@ -4,8 +4,9 @@ import { advanceWalker, pointAt } from './navigation.mjs';
 import { CSS2DObject } from '../vendor/CSS2DRenderer.js';
 
 // =========================================================================
-// 島內漫步學者與助教群 (Archipelago Strollers & Scholars)
-// 在 8 座島嶼內部漫步、思考、交流的生動角色群，增添島嶼活力並分享心得
+// 島內常民學者與漫步助教群 (Archipelago Ambient Scholars & Strollers)
+// 漫步於各島的常民學者。無點擊時自然漫步沉思、不顯示人名干擾畫面；
+// 點擊時觸發即時心靈反饋效果（風鈴音效、跳躍揮手、腳底光環與頭頂氣泡對話）。
 // =========================================================================
 export const ARCHIPELAGO_STROLLERS = [
   // 中央衛城 (Center Acropolis)
@@ -212,12 +213,92 @@ export const ARCHIPELAGO_STROLLERS = [
   }
 ];
 
+// 輕巧心靈風鈴微音效（Web Audio API 即時合成）
+let scholarAudioCtx = null;
+function playScholarChime() {
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    if (!scholarAudioCtx) scholarAudioCtx = new Ctx();
+    if (scholarAudioCtx.state === 'suspended') scholarAudioCtx.resume();
+    const now = scholarAudioCtx.currentTime;
+    const osc = scholarAudioCtx.createOscillator();
+    const gain = scholarAudioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(659.25, now);
+    osc.frequency.exponentialRampToValueAtTime(880, now + 0.12);
+    gain.gain.setValueAtTime(0.08, now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+    osc.connect(gain);
+    gain.connect(scholarAudioCtx.destination);
+    osc.start(now);
+    osc.stop(now + 0.65);
+  } catch (e) {
+    // 忽略未互動前瀏覽器音訊限制
+  }
+}
+
 export function createResidents(scene, network, people, { onResident, onHost, toast } = {}) {
   const residents = [], owners = [], strollers = [], labels = [], pickables = [];
 
+  // ==============================================================
+  // 即時 3D 心靈對話氣泡（點擊人物時專屬浮現，非靜態呆板常駐名牌）
+  // ==============================================================
+  const bubbleDiv = document.createElement('div');
+  bubbleDiv.className = 'scholar-thought-bubble';
+  bubbleDiv.style.display = 'none';
+  const bubbleObject = new CSS2DObject(bubbleDiv);
+  bubbleObject.position.set(0, 2.35, 0);
+  let bubbleTimer = null;
+
+  function showThoughtBubble(stroller, s) {
+    if (bubbleTimer) clearTimeout(bubbleTimer);
+
+    if (bubbleObject.parent) {
+      bubbleObject.parent.remove(bubbleObject);
+    }
+
+    bubbleDiv.innerHTML = `
+      <div class="bubble-header">
+        <span class="bubble-icon">💡</span>
+        <strong class="bubble-name">${s.name}</strong>
+        <span class="bubble-role">${s.role}</span>
+      </div>
+      <div class="bubble-text">${s.comment}</div>
+    `;
+    bubbleDiv.classList.remove('fade-out');
+    bubbleDiv.style.display = 'block';
+
+    stroller.g.add(bubbleObject);
+
+    // 4.5 秒後淡出並收合
+    bubbleTimer = setTimeout(() => {
+      bubbleDiv.classList.add('fade-out');
+      setTimeout(() => {
+        bubbleDiv.style.display = 'none';
+        if (bubbleObject.parent) bubbleObject.parent.remove(bubbleObject);
+      }, 350);
+    }, 4500);
+  }
+
   function sayStroller(id) {
-    const s = ARCHIPELAGO_STROLLERS.find(st => st.id === id);
-    if (!s) return;
+    const st = strollers.find(item => item.strollerId === id);
+    if (!st) return;
+    const s = st.data;
+
+    // 1. 播放心靈風鈴微音效
+    playScholarChime();
+
+    // 2. 觸發歡欣跳躍、熱情揮手與光環爆發
+    st.reactionTimer = 2.4;
+    st.jumpPhase = 0;
+    st.burstScale = 1.0;
+    st.burstOpacity = 0.9;
+
+    // 3. 浮現即時 3D 頭頂心靈對話氣泡（隨人物跳動同步飄揚）
+    showThoughtBubble(st, s);
+
+    // 4. 同步底部通知欄回饋
     const msg = `💬【${s.name}】（${s.role}）：${s.comment}`;
     if (toast) {
       toast(msg);
@@ -242,9 +323,6 @@ export function createResidents(scene, network, people, { onResident, onHost, to
 
     if (kind === 'island-host') {
       button.dataset.hostIsland = id;
-    } else if (kind === 'island-stroller') {
-      button.dataset.strollerIsland = id;
-      button.dataset.strollerId = actor.strollerId;
     } else {
       button.dataset.resident = id;
     }
@@ -262,12 +340,12 @@ export function createResidents(scene, network, people, { onResident, onHost, to
     }
 
     const object = new CSS2DObject(button);
-    object.position.y = kind === 'island-host' ? 2.15 : kind === 'island-stroller' ? 1.95 : 1.85;
+    object.position.y = kind === 'island-host' ? 2.15 : 1.85;
     actor.g.add(object);
     labels.push({ object, button, actor, kind, islandId: id });
   }
 
-  // 1. Curriculum Residents (14 課業島民，沿 network.paths 穿梭環島與長橋)
+  // 1. Curriculum Residents (14 課業導覽島民，沿 network.paths 穿梭環島與長橋)
   for (let i = 0; i < people.length; i++) {
     const person = people[i];
     const { g, legs, arms } = createAnimeCharacter(i, false, person);
@@ -319,7 +397,9 @@ export function createResidents(scene, network, people, { onResident, onHost, to
     labelFor(actor, '張春興教授', 'island-host', node.id, '島主張春興教授：點擊詢問教學與網站功能', () => onHost?.());
   }
 
-  // 3. Archipelago Strollers (17 位島內漫步助教與學者)
+  // 3. Archipelago Ambient Walkers (17 位常民漫步助教與學者)
+  // 依使用者指示：無點擊時「不需要出現人名」，自然走動生活、保持畫面清爽好看；
+  // 具備實體點擊與光環互動效果。
   for (let i = 0; i < ARCHIPELAGO_STROLLERS.length; i++) {
     const s = ARCHIPELAGO_STROLLERS[i];
     const node = network.nodes.find(n => n.id === s.island);
@@ -330,6 +410,35 @@ export function createResidents(scene, network, people, { onResident, onHost, to
     g.scale.setScalar(1.58);
     scene.add(g);
 
+    // 腳下微光足跡環（走動時輕柔呼吸脈動）
+    const footRing = new THREE.Mesh(
+      new THREE.RingGeometry(0.18, 0.34, 20),
+      new THREE.MeshBasicMaterial({ color: 0x8b5cf6, transparent: true, opacity: 0.25, side: THREE.DoubleSide })
+    );
+    footRing.rotation.x = -Math.PI / 2;
+    footRing.position.y = 0.03;
+    g.add(footRing);
+
+    // 點擊觸發的金色靈感光環擴散網
+    const burstRing = new THREE.Mesh(
+      new THREE.RingGeometry(0.25, 0.45, 24),
+      new THREE.MeshBasicMaterial({ color: 0xf59e0b, transparent: true, opacity: 0, side: THREE.DoubleSide })
+    );
+    burstRing.rotation.x = -Math.PI / 2;
+    burstRing.position.y = 0.05;
+    g.add(burstRing);
+
+    // 靈敏碰撞判定圓柱體（確保手機與滑鼠點擊輕鬆命中）
+    const hitBox = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.55, 0.55, 2.2, 8),
+      new THREE.MeshBasicMaterial({ visible: false })
+    );
+    hitBox.position.y = 1.1;
+    hitBox.userData.stroller = s.id;
+    hitBox.userData.island = s.island;
+    g.add(hitBox);
+    pickables.push(hitBox);
+
     const actor = {
       g,
       legs,
@@ -338,6 +447,13 @@ export function createResidents(scene, network, people, { onResident, onHost, to
       node,
       angle: s.phase,
       strollerId: s.id,
+      footRing,
+      burstRing,
+      reactionTimer: 0,
+      jumpPhase: 0,
+      burstScale: 1.0,
+      burstOpacity: 0,
+      cycleTime: i * 1.5,
       hover: false
     };
     strollers.push(actor);
@@ -358,7 +474,7 @@ export function createResidents(scene, network, people, { onResident, onHost, to
       }
     });
 
-    labelFor(actor, s.name, 'island-stroller', s.island, `${s.name}（${s.role}）：點擊聆聽心得`, () => sayStroller(s.id));
+    // 注意：不建立常駐 labelFor，徹底滿足「若無效人物應該只需要走動，不用出現人名」的要求！
   }
 
   let time = 0;
@@ -396,26 +512,93 @@ export function createResidents(scene, network, people, { onResident, onHost, to
         o.legs[1].rotation.x = -swing;
       }
 
-      // 3. Archipelago Strollers Walk
+      // 3. Archipelago Ambient Walkers (生活動態、走動、駐足沉思與點擊反應)
       for (const st of strollers) {
         if (st.hover) continue;
+
+        st.cycleTime = (st.cycleTime || 0) + dt;
+        const cycle = (st.cycleTime + st.data.phase * 5) % 18;
+        const isPondering = cycle > 14 && cycle < 17.5; // 每 18 秒駐足沉思 3.5 秒
+
         const walkR = (st.node.walkRadius || st.node.radius * 0.82) * st.data.radiusFactor;
-        st.angle += dt * st.data.speed * st.data.dir * 0.18;
-        const x = st.node.x + Math.sin(st.angle) * walkR;
-        const z = st.node.z + Math.cos(st.angle) * walkR;
-        const y = (st.node.height ?? 0.49) + Math.abs(Math.sin(time * 3.5 + st.data.phase)) * 0.035;
 
-        st.g.position.set(x, y, z);
-        st.g.rotation.y = st.angle + (st.data.dir > 0 ? Math.PI / 2 : -Math.PI / 2);
+        // 若觸發點擊反應
+        if (st.reactionTimer > 0) {
+          st.reactionTimer -= dt;
+          st.jumpPhase = (st.jumpPhase || 0) + dt * 6.5;
 
-        const legSwing = Math.sin(time * 5.2 + st.data.phase) * 0.38;
-        if (st.legs && st.legs.length >= 2) {
-          st.legs[0].rotation.x = legSwing;
-          st.legs[1].rotation.x = -legSwing;
-        }
-        if (st.arms && st.arms.length >= 2) {
-          st.arms[0].rotation.x = -legSwing * 0.7;
-          st.arms[1].rotation.x = legSwing * 0.7;
+          const jumpBonus = Math.max(0, Math.sin(Math.min(Math.PI, st.jumpPhase))) * 0.42;
+          const x = st.node.x + Math.sin(st.angle) * walkR;
+          const z = st.node.z + Math.cos(st.angle) * walkR;
+          st.g.position.set(x, (st.node.height ?? 0.49) + jumpBonus, z);
+
+          // 熱情揮手與打招呼體態
+          if (st.arms && st.arms.length >= 2) {
+            st.arms[0].rotation.z = 2.2 + Math.sin(time * 16) * 0.35;
+            st.arms[0].rotation.x = 0;
+            st.arms[1].rotation.z = -0.3;
+          }
+          if (st.legs && st.legs.length >= 2) {
+            st.legs[0].rotation.x = 0;
+            st.legs[1].rotation.x = 0;
+          }
+
+          // 金色光環擴散
+          if (st.burstRing) {
+            st.burstScale = Math.min(3.2, (st.burstScale || 1) + dt * 3.5);
+            st.burstOpacity = Math.max(0, (st.burstOpacity || 0.8) - dt * 0.55);
+            st.burstRing.scale.set(st.burstScale, st.burstScale, st.burstScale);
+            st.burstRing.material.opacity = st.burstOpacity;
+          }
+        } else if (isPondering) {
+          // 駐足沉思：停步、手托下巴沈思、輕柔微調角度
+          const x = st.node.x + Math.sin(st.angle) * walkR;
+          const z = st.node.z + Math.cos(st.angle) * walkR;
+          st.g.position.set(x, st.node.height ?? 0.49, z);
+
+          if (st.legs && st.legs.length >= 2) {
+            st.legs[0].rotation.x = 0;
+            st.legs[1].rotation.x = 0;
+          }
+          if (st.arms && st.arms.length >= 2) {
+            st.arms[0].rotation.x = -1.1;
+            st.arms[0].rotation.z = 0.4;
+            st.arms[1].rotation.x = 0.2;
+          }
+          if (st.footRing) {
+            st.footRing.material.opacity = 0.15;
+          }
+          if (st.burstRing) {
+            st.burstRing.material.opacity = 0;
+          }
+        } else {
+          // 正常自然漫步
+          st.angle += dt * st.data.speed * st.data.dir * 0.18;
+          const x = st.node.x + Math.sin(st.angle) * walkR;
+          const z = st.node.z + Math.cos(st.angle) * walkR;
+          const y = (st.node.height ?? 0.49) + Math.abs(Math.sin(time * 3.5 + st.data.phase)) * 0.035;
+
+          st.g.position.set(x, y, z);
+          st.g.rotation.y = st.angle + (st.data.dir > 0 ? Math.PI / 2 : -Math.PI / 2);
+
+          const legSwing = Math.sin(time * 5.2 + st.data.phase) * 0.38;
+          if (st.legs && st.legs.length >= 2) {
+            st.legs[0].rotation.x = legSwing;
+            st.legs[1].rotation.x = -legSwing;
+          }
+          if (st.arms && st.arms.length >= 2) {
+            st.arms[0].rotation.x = -legSwing * 0.7;
+            st.arms[1].rotation.x = legSwing * 0.7;
+            st.arms[0].rotation.z = 0;
+            st.arms[1].rotation.z = 0;
+          }
+          if (st.footRing) {
+            st.footRing.scale.setScalar(0.9 + Math.sin(time * 6 + st.data.phase) * 0.2);
+            st.footRing.material.opacity = 0.22 + Math.sin(time * 6 + st.data.phase) * 0.12;
+          }
+          if (st.burstRing) {
+            st.burstRing.material.opacity = 0;
+          }
         }
       }
     },

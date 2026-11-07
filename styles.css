@@ -1213,50 +1213,118 @@ html[data-theme=night] .philosopher-boat-tag:hover {
 }
 
 /* ==============================================================
-   島內漫步人物 (Archipelago Strollers & Scholars) 標籤樣式
+   島內人物即時心靈對話氣泡 (Interactive Scholar Thought Bubble)
+   點擊漫步學者時浮現生動對話，無點擊時不出現多餘人名，畫面純淨清爽
    ============================================================== */
-.person-label.island-stroller {
-  pointer-events: auto;
-  min-width: 44px;
-  min-height: 44px;
-}
-.person-label.island-stroller > span {
-  display: block;
-  background: rgba(255, 252, 245, 0.96);
+.scholar-thought-bubble {
+  position: relative;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 1.5px solid #8b5cf6;
-  border-radius: 12px;
-  padding: 5px 8px;
-  font-size: 11px;
-  font-weight: 700;
-  color: #5b21b6;
-  box-shadow: 0 4px 10px rgba(139, 92, 246, 0.22);
-  white-space: nowrap;
-  letter-spacing: 0.3px;
-  transition: transform 0.15s ease, background 0.15s ease;
+  border-radius: 16px;
+  padding: 11px 15px;
+  box-shadow: 0 10px 28px rgba(139, 92, 246, 0.28), 0 2px 8px rgba(0, 0, 0, 0.08);
+  max-width: 270px;
+  min-width: 210px;
+  pointer-events: auto;
+  transform-origin: bottom center;
+  animation: scholarBubblePopIn 0.32s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  z-index: 100;
+  text-align: left;
 }
-.person-label.island-stroller > span::before {
-  content: '🚶 ';
-  font-size: 10px;
+
+@keyframes scholarBubblePopIn {
+  0% { opacity: 0; transform: scale(0.65) translateY(12px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
 }
-.person-label.island-stroller > span::after {
+
+.scholar-thought-bubble.fade-out {
+  animation: scholarBubblePopOut 0.35s ease forwards;
+}
+
+@keyframes scholarBubblePopOut {
+  0% { opacity: 1; transform: scale(1) translateY(0); }
+  100% { opacity: 0; transform: scale(0.85) translateY(-8px); }
+}
+
+/* 氣泡下方指向角 */
+.scholar-thought-bubble::after {
   content: '';
   position: absolute;
-  left: 20px;
-  bottom: 4px;
-  border: 4px solid transparent;
-  border-top-color: #8b5cf6;
+  bottom: -9px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 9px 8px 0;
+  border-style: solid;
+  border-color: #8b5cf6 transparent transparent;
+  display: block;
+  width: 0;
 }
-.person-label.island-stroller:hover > span {
-  background: #f5f3ff;
-  border-color: #7c3aed;
-  transform: translateY(-2px) scale(1.04);
+.scholar-thought-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 7px 6px 0;
+  border-style: solid;
+  border-color: #ffffff transparent transparent;
+  display: block;
+  width: 0;
+  z-index: 1;
 }
-html[data-theme=night] .person-label.island-stroller > span {
-  background: rgba(30, 27, 75, 0.94);
+
+.scholar-thought-bubble .bubble-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+  padding-bottom: 4px;
+}
+.scholar-thought-bubble .bubble-icon {
+  font-size: 14px;
+}
+.scholar-thought-bubble .bubble-name {
+  font-size: 13px;
+  font-weight: 800;
+  color: #4c1d95;
+}
+.scholar-thought-bubble .bubble-role {
+  font-size: 10px;
+  color: #6d28d9;
+  background: #ede9fe;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+.scholar-thought-bubble .bubble-text {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: #1e1b4b;
+  margin: 0;
+}
+
+html[data-theme=night] .scholar-thought-bubble {
+  background: rgba(26, 22, 51, 0.96);
   border-color: #a78bfa;
-  color: #ede9fe;
-  box-shadow: 0 4px 12px rgba(167, 139, 250, 0.3);
+  box-shadow: 0 10px 30px rgba(167, 139, 250, 0.35);
 }
-html[data-theme=night] .person-label.island-stroller > span::after {
-  border-top-color: #a78bfa;
+html[data-theme=night] .scholar-thought-bubble::before {
+  border-color: #1a1633 transparent transparent;
+}
+html[data-theme=night] .scholar-thought-bubble .bubble-header {
+  border-bottom-color: rgba(167, 139, 250, 0.25);
+}
+html[data-theme=night] .scholar-thought-bubble .bubble-name {
+  color: #ede9fe;
+}
+html[data-theme=night] .scholar-thought-bubble .bubble-role {
+  color: #ddd6fe;
+  background: #3b2d66;
+}
+html[data-theme=night] .scholar-thought-bubble .bubble-text {
+  color: #f3f0ff;
 }

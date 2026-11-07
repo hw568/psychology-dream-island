@@ -1079,6 +1079,19 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
  const pointer=new THREE.Vector2(),raycaster=new THREE.Raycaster();
  let down=null;
 
+ renderer.domElement.addEventListener('pointermove',e=>{
+   if(interior.active||flight)return;
+   const rect=renderer.domElement.getBoundingClientRect();
+   pointer.set((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1);
+   raycaster.setFromCamera(pointer,camera);
+   const hit=raycaster.intersectObjects(pickables,false)[0];
+   if(hit&&(hit.object.userData.stroller||hit.object.userData.resident||hit.object.userData.host||hit.object.userData.isPhilosopher||hit.object.userData.building)){
+     renderer.domElement.style.cursor='pointer';
+   }else{
+     renderer.domElement.style.cursor='';
+   }
+ });
+
  renderer.domElement.addEventListener('pointerdown',e=>{
    down={x:e.clientX,y:e.clientY};
  });
@@ -1145,7 +1158,10 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
    select(id){
      if(interior.active&&id==='center')return;
      focusIsland(id);
-     },
+   },
+   sayStroller(id){
+     residents.sayStroller(id);
+   },
    setTheme(t){
      theme=t;layoutKey='';
      const color=t==='night'?palette.night:t==='mist'?palette.mist:palette.water;
