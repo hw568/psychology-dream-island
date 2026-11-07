@@ -152,7 +152,7 @@ export function saveCollectedQuote(philosopherId) {
 }
 
 export function createPhilosopherBoats(scene, options = {}) {
-  const { onOpenQuote, toast } = options;
+  const { onOpenQuote, toast, onSelectCourse } = options;
   const boats = [];
   const pickables = [];
 
@@ -350,10 +350,15 @@ export function createPhilosopherBoats(scene, options = {}) {
           ${isCollected ? '✓ 已收集至名言錄' : '📜 收集至我的名言錄'}
         </button>
         <button type="button" id="btn-quote-to-notes">📝 引用至我的隨堂筆記</button>
+        ${phil.relatedCourseId ? `<button type="button" class="phil-course-jump" id="btn-goto-course">⚓ 航向關聯島嶼：${phil.relatedCourseName || '前往課程'} ↗</button>` : ''}
       </div>
     `;
 
     dialog.querySelector('.dialog-close')?.addEventListener('click', () => dialog.close());
+    dialog.querySelector('#btn-goto-course')?.addEventListener('click', () => {
+      dialog.close();
+      onSelectCourse?.(phil.relatedCourseId);
+    });
 
     dialog.querySelector('#btn-collect-quote')?.addEventListener('click', e => {
       saveCollectedQuote(phil.id);

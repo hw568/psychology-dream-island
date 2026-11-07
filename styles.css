@@ -631,3 +631,117 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   color: #fff;
   border-color: var(--primary);
 }
+
+
+/* ========================================================= */
+/* Enhanced Operational Continuity & Transitions             */
+/* ========================================================= */
+.island-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--line);
+}
+.stepper-btn {
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+.stepper-btn:hover {
+  background: #f0e6f5;
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+.stepper-btn.next {
+  background: linear-gradient(135deg, #6b4d84, #835c9e);
+  color: #fff;
+  border: none;
+  margin-left: auto;
+  box-shadow: 0 4px 12px rgba(107, 77, 132, 0.25);
+}
+.stepper-btn.next:hover {
+  background: linear-gradient(135deg, #593e6f, #724f8c);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(107, 77, 132, 0.35);
+}
+
+.phil-course-jump {
+  background: linear-gradient(135deg, rgba(107, 77, 132, 0.12), rgba(237, 157, 80, 0.16)) !important;
+  border-color: #baa1ce !important;
+  color: var(--primary-text) !important;
+  font-weight: 700;
+  cursor: pointer;
+}
+.phil-course-jump:hover {
+  background: linear-gradient(135deg, rgba(107, 77, 132, 0.22), rgba(237, 157, 80, 0.26)) !important;
+  border-color: var(--primary) !important;
+  transform: translateY(-1px);
+}
+
+.breadcrumb-arrow {
+  color: var(--muted);
+  margin: 0 4px;
+  font-weight: 400;
+}
+.heading-overview-btn {
+  background: rgba(107, 77, 132, 0.12);
+  border: 1px solid #baa1ce;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--primary-text);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.heading-overview-btn:hover {
+  background: var(--primary);
+  color: #fff;
+  border-color: transparent;
+}
+
+@keyframes panelSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+#panel:not([hidden]) {
+  animation: panelSlideIn 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes scrimFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+#panel-scrim:not([hidden]) {
+  animation: scrimFadeIn 0.2s ease-out;
+}
+@keyframes dialogPopIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+dialog[open] {
+  animation: dialogPopIn 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}

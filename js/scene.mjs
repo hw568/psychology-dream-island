@@ -47,7 +47,12 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
 
  // Expanded camera view frustum with deep zoom range
  const camera=new THREE.OrthographicCamera(-mapWidth/2,mapWidth/2,mapWidth/2,-mapWidth/2,.1,Math.max(400,mapExtent*8));
- const cameraOffset=new THREE.Vector3(55,75,90).multiplyScalar(Math.max(1,mapExtent/45));
+ 
+  const _scratchVec3 = new THREE.Vector3();
+  const _scratchSpherical = new THREE.Spherical();
+  const _projVec = new THREE.Vector3();
+
+  const cameraOffset=new THREE.Vector3(55,75,90).multiplyScalar(Math.max(1,mapExtent/45));
  camera.position.copy(cameraOffset).add(new THREE.Vector3(0,4,0));
  camera.lookAt(0,4,0);
 
@@ -555,6 +560,7 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
  const environment=createSeascape(scene,locations);
  const philosopherBoats=createPhilosopherBoats(scene,{
    onOpenQuote: phil => onPersonalKnowledge?.(phil?.relatedCourseId, phil),
+    onSelectCourse: courseId => { focusIsland(courseId); onSelect?.(courseId); },
    toast: msg => {
      const t = document.querySelector('#toast');
      if (t) { t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3200); }
@@ -648,7 +654,7 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
      const isHost=l.button.dataset.hostIsland;
      const near= Math.hypot(position.x-selectedIsland.position.x,position.z-selectedIsland.position.z)<selectedIsland.userData.radius+.8;
      if((isHost&&isHost!==selected)||!near){l.button.style.visibility='hidden';continue;}
-     const p=l.object.getWorldPosition(new THREE.Vector3()).project(camera),rawX=(p.x+1)*w/2,rawY=(-p.y+1)*h/2;
+     const p=l.object.getWorldPosition(_projVec).project(camera),rawX=(p.x+1)*w/2,rawY=(-p.y+1)*h/2;
      const bw=l.button.offsetWidth,bh=l.button.offsetHeight;
      if(p.z>1||rawX<-30||rawX>w+30||rawY<-30||rawY>h+30){l.button.style.visibility='hidden';continue;}
      l.button.style.visibility='visible';
@@ -688,11 +694,7 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
 
    if(!reduced&&!flight){
      elapsed+=dt;
-     shadowElapsed+=dt;
-     if(shadowElapsed>1.2){
-       renderer.shadowMap.needsUpdate=true;
-       shadowElapsed=0;
-     }
+     
 
      residents.update(dt);
      philosopherBoats.update(dt);
