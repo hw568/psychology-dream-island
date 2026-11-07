@@ -6,6 +6,7 @@ export function createCharacterController(scene, network, locations, camera, con
     onSelectCourse,
     onOpenResident,
     onOpenHost,
+    onOpenPersonalKnowledge,
     onProximityChange,
     hostElement = document.body
   } = options;
@@ -19,7 +20,7 @@ export function createCharacterController(scene, network, locations, camera, con
   // Initial Position at Center Island
   const centerNode = network.nodes.find(n => n.id === 'center') || network.nodes[0];
   const startX = centerNode ? centerNode.x : 0;
-  const startZ = centerNode ? centerNode.z + 1.8 : 1.8;
+  const startZ = centerNode ? centerNode.z + 2.2 : 2.2;
   const startY = (centerNode ? (centerNode.height ?? 0.49) : 0.49);
 
   player.g.position.set(startX, startY, startZ);
@@ -30,18 +31,19 @@ export function createCharacterController(scene, network, locations, camera, con
     puppyObj = player.puppy;
     player.g.remove(puppyObj.g);
     scene.add(puppyObj.g);
-    puppyObj.g.position.set(startX - 0.6, startY, startZ - 0.4);
+    puppyObj.g.position.set(startX - 0.7, startY, startZ - 0.5);
   }
 
-  // 2. Controller States
+  // 2. Controller States & Zoom Controls
+  const ZOOM_PRESETS = [3.2, 5.8, 14.0]; // Close-up (特寫), Medium follow (標準跟隨), Wide (廣角俯瞰)
   const state = {
     x: startX,
     y: startY,
     z: startZ,
     angle: 0,
     speed: 0,
-    walkSpeed: 5.2,
-    runSpeed: 9.0,
+    walkSpeed: 5.6,
+    runSpeed: 9.6,
     rotSpeed: 4.2,
     isGrounded: true,
     jumpVelocity: 0,
@@ -49,6 +51,9 @@ export function createCharacterController(scene, network, locations, camera, con
     isMoving: false,
     isRunning: false,
     cameraFollow: false, // Third-person camera follow mode
+    cameraDistance: 4.8,
+    targetCameraDistance: 4.8,
+    zoomPresetIndex: 0,
     activeTarget: null,  // Click-to-move target {x, z}
     currentIsland: 'center',
     nearbyResident: null,
@@ -65,8 +70,18 @@ export function createCharacterController(scene, network, locations, camera, con
     jump: false
   };
 
-  // Touch Direction Vector (-1 to 1)
-  const touchDir = { x: 0, z: 0, active: false };
+  function cycleZoom() {
+    state.zoomPresetIndex = (state.zoomPresetIndex + 1) % ZOOM_PRESETS.length;
+    state.targetCameraDistance = ZOOM_PRESETS[state.zoomPresetIndex];
+    if (!state.cameraFollow) {
+      toggleCameraFollow(true);
+    }
+    return state.targetCameraDistance;
+  }
+
+  function zoom(delta) {
+    state.targetCameraDistance = Math.max(2.0, Math.min(26.0, state.targetCameraDistance + delta));
+  }
 
   function onKeyDown(e) {
     if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
@@ -107,6 +122,9 @@ export function createCharacterController(scene, network, locations, camera, con
       case 'KeyC':
         toggleCameraFollow();
         break;
+      case 'KeyZ':
+        cycleZoom();
+        break;
     }
   }
 
@@ -137,13 +155,22 @@ export function createCharacterController(scene, network, locations, camera, con
 
   function jump() {
     if (state.isGrounded) {
-      state.jumpVelocity = 6.4;
+      state.jumpVelocity = 6.6;
       state.isGrounded = false;
+    }
+  }
+
+  function onWheel(e) {
+    if (state.cameraFollow) {
+      // Smoothly zoom in / out when in third-person camera follow mode
+      e.preventDefault();
+      zoom(e.deltaY * 0.008);
     }
   }
 
   window.addEventListener('keydown', onKeyDown);
   window.addEventListener('keyup', onKeyUp);
+  window.addEventListener('wheel', onWheel, { passive: false });
 
   // =========================================================
   // 3. Touch Virtual Controls (觸控虛擬方向盤 & 互動鈕)
@@ -159,6 +186,7 @@ export function createCharacterController(scene, network, locations, camera, con
       <div class="dpad-center" id="dpad-center">●</div>
     </div>
     <div class="touch-actions">
+      <button class="touch-action-btn zoom-btn" id="touch-zoom" aria-label="切換鏡頭特寫">特寫</button>
       <button class="touch-action-btn jump-btn" id="touch-jump" aria-label="跳躍">跳躍</button>
       <button class="touch-action-btn interact-btn" id="touch-interact" aria-label="互動">交談</button>
     </div>
@@ -188,6 +216,10 @@ export function createCharacterController(scene, network, locations, camera, con
   dpad.addEventListener('pointerup', clearDpad);
   dpad.addEventListener('pointerleave', clearDpad);
 
+  touchUI.querySelector('#touch-zoom').addEventListener('pointerdown', e => {
+    e.preventDefault();
+    cycleZoom();
+  });
   touchUI.querySelector('#touch-jump').addEventListener('pointerdown', e => {
     e.preventDefault();
     jump();
@@ -199,7 +231,9 @@ export function createCharacterController(scene, network, locations, camera, con
 
   // Trigger Interaction when nearby
   function triggerInteraction() {
-    if (state.nearbyResident) {
+    if (state.nearbyLandmark === 'island-personal' || state.nearbyResident?.id === 'guide-sisi') {
+      onOpenPersonalKnowledge?.();
+    } else if (state.nearbyResident) {
       onOpenResident?.(state.nearbyResident.id);
     } else if (state.nearbyLandmark) {
       onSelectCourse?.(state.nearbyLandmark);
@@ -218,7 +252,7 @@ export function createCharacterController(scene, network, locations, camera, con
     state.activeTarget = { x: targetX, z: targetZ };
   }
 
-  // Ground detection / clamping to islands or bridges
+  // Ground detection / clamping to islands or bridges (supports wider 4m+ bridges)
   function getGroundHeight(x, z) {
     for (const node of network.nodes) {
       const d = Math.hypot(x - node.x, z - node.z);
@@ -232,7 +266,8 @@ export function createCharacterController(scene, network, locations, camera, con
           const p1 = path.points[i];
           const p2 = path.points[i + 1];
           const dist = distToSegment(x, z, p1.x, p1.z, p2.x, p2.z);
-          if (dist < 1.45) {
+          // Widened to 2.5 units to match wider 4m+ bridge decks
+          if (dist < 2.5) {
             const t = Math.max(0, Math.min(1, projectionFactor(x, z, p1.x, p1.z, p2.x, p2.z)));
             const bridgeY = p1.y + (p2.y - p1.y) * t + 0.35;
             return { y: bridgeY, island: path.fromIsland || 'bridge' };
@@ -257,16 +292,16 @@ export function createCharacterController(scene, network, locations, camera, con
     return ((px - x1) * (x2 - x1) + (pz - z1) * (z2 - z1)) / l2;
   }
 
-  // Pre-cached residents list to eliminate scene.traverse CPU lag!
+  // Pre-cached residents list to eliminate scene.traverse CPU lag
   let cachedResidents = [];
   function setResidentsCache(list) {
     cachedResidents = list;
   }
 
   const puppyState = {
-    x: startX - 0.6,
+    x: startX - 0.7,
     y: startY,
-    z: startZ - 0.4,
+    z: startZ - 0.5,
     angle: 0
   };
 
@@ -347,8 +382,8 @@ export function createCharacterController(scene, network, locations, camera, con
 
     // Animate Puppy Companion
     if (puppyObj) {
-      const pupTargetX = state.x - Math.sin(state.angle) * 0.55 - Math.cos(state.angle) * 0.45;
-      const pupTargetZ = state.z - Math.cos(state.angle) * 0.55 + Math.sin(state.angle) * 0.45;
+      const pupTargetX = state.x - Math.sin(state.angle) * 0.65 - Math.cos(state.angle) * 0.55;
+      const pupTargetZ = state.z - Math.cos(state.angle) * 0.65 + Math.sin(state.angle) * 0.55;
 
       const pupDx = pupTargetX - puppyState.x;
       const pupDz = pupTargetZ - puppyState.z;
@@ -357,7 +392,7 @@ export function createCharacterController(scene, network, locations, camera, con
       const pupMoving = pupDist > 0.22;
       if (pupMoving) {
         puppyState.angle = Math.atan2(pupDx, pupDz);
-        const pupSpeed = (state.isRunning ? 10.0 : 6.0) * dt;
+        const pupSpeed = (state.isRunning ? 10.5 : 6.5) * dt;
         puppyState.x += (pupDx / pupDist) * Math.min(pupDist, pupSpeed);
         puppyState.z += (pupDz / pupDist) * Math.min(pupDist, pupSpeed);
       }
@@ -372,7 +407,7 @@ export function createCharacterController(scene, network, locations, camera, con
     }
 
     // =========================================================
-    // Optimized Proximity Check (Runs every 0.1s, NO scene.traverse!)
+    // Optimized Proximity Check (Runs every 0.1s)
     // =========================================================
     proximityCheckTimer += dt;
     if (proximityCheckTimer > 0.1) {
@@ -382,7 +417,7 @@ export function createCharacterController(scene, network, locations, camera, con
 
       for (const res of cachedResidents) {
         const d = Math.hypot(res.x - state.x, res.z - state.z);
-        if (d < 2.5) {
+        if (d < 2.8) {
           foundResident = { id: res.id, name: res.name };
           break;
         }
@@ -390,7 +425,7 @@ export function createCharacterController(scene, network, locations, camera, con
 
       for (const [id, g] of locations) {
         const d = Math.hypot(g.position.x - state.x, g.position.z - state.z);
-        if (d < 2.8) {
+        if (d < (id === 'island-personal' ? 4.5 : 3.5)) {
           foundLandmark = id;
           break;
         }
@@ -407,19 +442,27 @@ export function createCharacterController(scene, network, locations, camera, con
       }
     }
 
-    // Third-person camera follow mode
+    // Smoothly interpolate camera zoom distance towards target
+    state.cameraDistance += (state.targetCameraDistance - state.cameraDistance) * Math.min(1, dt * 8);
+
+    // Camera follow & Close-up Zoom logic
     if (state.cameraFollow) {
-      const camDist = 18;
-      const camHeight = 14;
+      const camDist = state.cameraDistance;
+      const camHeight = Math.max(1.3, camDist * 0.48);
       const targetCamX = state.x - Math.sin(state.angle) * camDist;
       const targetCamZ = state.z - Math.cos(state.angle) * camDist;
       const targetCamY = state.y + camHeight;
 
-      camera.position.x += (targetCamX - camera.position.x) * dt * 5;
-      camera.position.y += (targetCamY - camera.position.y) * dt * 5;
-      camera.position.z += (targetCamZ - camera.position.z) * dt * 5;
+      camera.position.x += (targetCamX - camera.position.x) * Math.min(1, dt * 6);
+      camera.position.y += (targetCamY - camera.position.y) * Math.min(1, dt * 6);
+      camera.position.z += (targetCamZ - camera.position.z) * Math.min(1, dt * 6);
 
-      camera.lookAt(state.x, state.y + 1.2, state.z);
+      camera.lookAt(state.x, state.y + 1.1, state.z);
+    } else if (state.isMoving) {
+      // In OrbitControls mode, smoothly track character position so mouse wheel zooming heads directly to the character
+      controls.target.x += (state.x - controls.target.x) * Math.min(1, dt * 4);
+      controls.target.z += (state.z - controls.target.z) * Math.min(1, dt * 4);
+      controls.target.y += (state.y + 1.1 - controls.target.y) * Math.min(1, dt * 4);
     }
   }
 
@@ -427,12 +470,12 @@ export function createCharacterController(scene, network, locations, camera, con
     const loc = locations.get(islandId);
     if (!loc) return;
     state.x = loc.position.x;
-    state.z = loc.position.z + 1.5;
+    state.z = loc.position.z + 1.8;
     state.y = loc.position.y + 0.49;
     state.activeTarget = null;
     player.g.position.set(state.x, state.y, state.z);
     if (puppyObj) {
-      puppyState.x = state.x - 0.5;
+      puppyState.x = state.x - 0.6;
       puppyState.z = state.z - 0.5;
       puppyState.y = state.y;
       puppyObj.g.position.set(puppyState.x, puppyState.y, puppyState.z);
@@ -442,6 +485,7 @@ export function createCharacterController(scene, network, locations, camera, con
   function dispose() {
     window.removeEventListener('keydown', onKeyDown);
     window.removeEventListener('keyup', onKeyUp);
+    window.removeEventListener('wheel', onWheel);
     touchUI.remove();
   }
 
@@ -453,6 +497,8 @@ export function createCharacterController(scene, network, locations, camera, con
     moveTo,
     teleportTo,
     toggleCameraFollow,
+    cycleZoom,
+    zoom,
     triggerInteraction,
     setResidentsCache,
     dispose
