@@ -758,7 +758,14 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
  const bridgeView=createBridges(scene,network);
  walkSurfaces.push(...bridgeView.surfaces);
 
- const residents=createResidents(scene,network,data.residents,{onResident,onHost});
+ const residents=createResidents(scene,network,data.residents,{
+   onResident,
+   onHost,
+   toast: msg => {
+     const t = document.querySelector('#toast');
+     if (t) { t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3800); }
+   }
+ });
  pickables.push(...residents.pickables);
 
  // Background islands
@@ -869,8 +876,9 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
    for(const l of entries){
      const position=l.actor.g.position;
      const isHost=l.button.dataset.hostIsland;
+     const isStroller=l.button.dataset.strollerIsland;
      const near= Math.hypot(position.x-selectedIsland.position.x,position.z-selectedIsland.position.z)<selectedIsland.userData.radius+.8;
-     if((isHost&&isHost!==selected)||!near){l.button.style.visibility='hidden';continue;}
+     if((isHost&&isHost!==selected)||(isStroller&&isStroller!==selected)||!near){l.button.style.visibility='hidden';continue;}
      const p=l.object.getWorldPosition(_projVec).project(camera),rawX=(p.x+1)*w/2,rawY=(-p.y+1)*h/2;
      const bw=l.button.offsetWidth,bh=l.button.offsetHeight;
      if(p.z>1||rawX<-30||rawX>w+30||rawY<-30||rawY>h+30){l.button.style.visibility='hidden';continue;}
@@ -1091,6 +1099,8 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
    const hit=raycaster.intersectObjects(pickables,false)[0];
    if(hit?.object.userData.isPhilosopher){
      philosopherBoats.openDialog(hit.object.userData.philosopherId);
+   }else if(hit?.object.userData.stroller){
+     residents.sayStroller(hit.object.userData.stroller);
    }else if(hit?.object.userData.resident){
      onResident?.(hit.object.userData.resident);
    }else if(hit?.object.userData.host){

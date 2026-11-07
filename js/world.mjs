@@ -1,21 +1,21 @@
 export const PSYCHOLOGY_ISLAND_LAYOUT = [
-  { id: 'center', x: 0, z: 0, radius: 22.0, elevation: 4.8 },
-  { id: 'island-personal', x: -5.0, z: -78.0, radius: 19.0, elevation: 4.4 },
-  { id: 'island-01', x: -62.0, z: -35.0, radius: 19.0, elevation: 3.2 },
-  { id: 'island-02', x: -68.0, z: 38.0, radius: 20.0, elevation: 2.5 },
-  { id: 'island-03', x: -16.0, z: 76.0, radius: 20.5, elevation: 4.4 },
-  { id: 'island-04', x: 52.0, z: 62.0, radius: 20.0, elevation: 3.4 },
-  { id: 'island-05', x: 78.0, z: 12.0, radius: 21.0, elevation: 2.8 },
-  { id: 'island-06', x: 56.0, z: -52.0, radius: 19.5, elevation: 5.0 }
+  { id: 'center', x: 0, z: 0, radius: 30.0, elevation: 5.2 },
+  { id: 'island-personal', x: -8.0, z: -128.0, radius: 28.0, elevation: 4.8 },
+  { id: 'island-01', x: -108.0, z: -62.0, radius: 27.5, elevation: 3.4 },
+  { id: 'island-02', x: -118.0, z: 66.0, radius: 28.5, elevation: 2.8 },
+  { id: 'island-03', x: -28.0, z: 130.0, radius: 29.0, elevation: 4.6 },
+  { id: 'island-04', x: 94.0, z: 108.0, radius: 28.5, elevation: 3.6 },
+  { id: 'island-05', x: 132.0, z: 20.0, radius: 29.5, elevation: 3.0 },
+  { id: 'island-06', x: 98.0, z: -92.0, radius: 28.0, elevation: 5.2 }
 ];
 
 export const BRIDGE_STYLES = [
-  { id: 'stone', name: '宏偉大理石大道橋', profile: 'arch', arc: 2.0, width: 5.8, color: '#ded7c9' },
-  { id: 'grand-stairs', name: '皇家階梯天橋', profile: 'stairs', arc: 0, width: 6.0, color: '#f4e3c4' },
-  { id: 'glass', name: '光芒水晶大道橋', profile: 'arch', arc: 1.8, width: 5.6, color: '#d6c8ee' },
-  { id: 'covered', name: '宏偉長廊亭橋', profile: 'arch', arc: 0.45, width: 5.8, color: '#cdb4a2' },
-  { id: 'lantern-arc', name: '彩虹心靈明燈橋', profile: 'arch', arc: 1.9, width: 5.8, color: '#e7c8b1' },
-  { id: 'rope', name: '群島懸索金橋', profile: 'sag', arc: -0.85, width: 5.4, color: '#bfa08a' }
+  { id: 'stone', name: '宏偉大理石大道橋', profile: 'arch', arc: 2.6, width: 6.6, color: '#ded7c9' },
+  { id: 'grand-stairs', name: '皇家階梯天橋', profile: 'stairs', arc: 0, width: 6.8, color: '#f4e3c4' },
+  { id: 'glass', name: '光芒水晶大道橋', profile: 'arch', arc: 2.4, width: 6.4, color: '#d6c8ee' },
+  { id: 'covered', name: '宏偉長廊亭橋', profile: 'arch', arc: 0.6, width: 6.6, color: '#cdb4a2' },
+  { id: 'lantern-arc', name: '彩虹心靈明燈橋', profile: 'arch', arc: 2.5, width: 6.6, color: '#e7c8b1' },
+  { id: 'rope', name: '群島懸索金橋', profile: 'sag', arc: -1.05, width: 6.2, color: '#bfa08a' }
 ];
 
 export function bridgeRoute(from, to, style) {
