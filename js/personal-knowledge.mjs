@@ -3,6 +3,8 @@
 // 支援個人隨堂筆記即時儲存、核心心理學概念卡、精通度統計、Markdown/JSON 知識手冊匯出
 // =========================================================================
 
+import { PHILOSOPHERS_DATA, loadCollectedQuotes } from './philosopher-boats.mjs';
+
 const STORAGE_KEY = 'psychology_island_personal_knowledge_v1';
 
 export const CORE_PSYCHOLOGY_CONCEPTS = [
@@ -194,6 +196,22 @@ export function exportNotesToMarkdown(data, state, notesData) {
     md += `---\n\n`;
   }
 
+  // 附上收集的海上哲學家名言錄
+  const collectedQuoteIds = loadCollectedQuotes();
+  if (collectedQuoteIds.length) {
+    md += `## ⛵ 海上哲學家智慧名言錄 (已收集 ${collectedQuoteIds.length} / ${PHILOSOPHERS_DATA.length} 位思想大師)\n\n`;
+    for (const qId of collectedQuoteIds) {
+      const p = PHILOSOPHERS_DATA.find(x => x.id === qId);
+      if (p) {
+        md += `### 💡 ${p.name} (${p.era})\n`;
+        md += `> **「${p.quote}」**  \n`;
+        md += `> *心靈小語：${p.insight}*  \n`;
+        md += `> *心理學啟發：${p.psychologyConnection}*  \n\n`;
+      }
+    }
+    md += `---\n\n`;
+  }
+
   md += `## 🏛️ 心靈總結與後設認知\n\n`;
   md += `${notesData.notes.center || '（尚無記錄）'}\n\n`;
   md += `*(由「心靈奧秘：普通心理學探索群島」個人心智島自動匯出生成)*\n`;
@@ -222,13 +240,14 @@ export function setupPersonalKnowledge(options = {}) {
     const readCount = data.courses.filter(c => state.courses?.[c.id]?.read).length;
     const avgScore = Math.round(data.courses.reduce((acc, c) => acc + (state.courses?.[c.id]?.score || 0), 0) / data.courses.length);
     const totalWords = Object.values(notesData.notes).reduce((acc, t) => acc + (t ? t.length : 0), 0);
+    const collectedQuoteIds = loadCollectedQuotes();
 
     dialog.innerHTML = `
       <button class="dialog-close icon-button" aria-label="關閉個人知識庫">✕</button>
       <div class="personal-header">
         <span class="personal-badge">🌟 PERSONAL MIND SANCTUARY</span>
         <h2>個人心智島 · 我的學習知識寶庫</h2>
-        <p class="personal-sub">在此整理你的自訂學習筆記、回顧經典心理學概念卡，並一鍵匯出完整知識手冊。</p>
+        <p class="personal-sub">在此整理你的自訂學習筆記、回顧經典心理學概念卡與海上哲學家名言，並一鍵匯出完整知識手冊。</p>
       </div>
 
       <div class="personal-stats-grid">
@@ -245,14 +264,15 @@ export function setupPersonalKnowledge(options = {}) {
           <span class="stat-label">累積筆記字數</span>
         </div>
         <div class="stat-card">
-          <span class="stat-num">${CORE_PSYCHOLOGY_CONCEPTS.length} 條</span>
-          <span class="stat-label">心理學概念庫</span>
+          <span class="stat-num">${collectedQuoteIds.length} / ${PHILOSOPHERS_DATA.length} 位</span>
+          <span class="stat-label">哲學家智慧名言</span>
         </div>
       </div>
 
       <div class="tabs personal-tabs" role="tablist">
         <button class="${activeTab === 'notes' ? 'active' : ''}" data-ptab="notes">📝 我的學習筆記</button>
         <button class="${activeTab === 'cards' ? 'active' : ''}" data-ptab="cards">💡 核心知識卡庫</button>
+        <button class="${activeTab === 'quotes' ? 'active' : ''}" data-ptab="quotes">⛵ 哲學名言錄 (${collectedQuoteIds.length}/${PHILOSOPHERS_DATA.length})</button>
         <button class="${activeTab === 'mastery' ? 'active' : ''}" data-ptab="mastery">📊 精通度總覽</button>
         <button class="${activeTab === 'export' ? 'active' : ''}" data-ptab="export">💾 知識庫匯出備份</button>
       </div>
@@ -336,6 +356,53 @@ export function setupPersonalKnowledge(options = {}) {
                 <button type="button" class="btn-sm quote-btn" data-quote-id="${card.id}">📌 引用至我的筆記</button>
               </div>
             `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    if (activeTab === 'quotes') {
+      const collected = loadCollectedQuotes();
+      return `
+        <div class="quotes-workspace">
+          <div class="quotes-intro-banner">
+            <span class="spark-icon">⛵</span>
+            <div>
+              <h4>海上哲學家智慧名言錄（已收集 ${collected.length} / ${PHILOSOPHERS_DATA.length} 位）</h4>
+              <p>在群島周圍海面上，7 位思想先驅正乘著智慧之舟徐徐巡弋。點選海面上的小船即可認識他們，並將傳世名言收錄於此。</p>
+            </div>
+          </div>
+          <div class="quotes-grid">
+            ${PHILOSOPHERS_DATA.map(phil => {
+              const isCol = collected.includes(phil.id);
+              return `
+                <div class="quote-card ${isCol ? 'quote-collected' : 'quote-locked'}">
+                  <div class="quote-card-header">
+                    <div>
+                      <span class="quote-card-name">${phil.name}</span>
+                      <small class="quote-card-era">${phil.era}</small>
+                    </div>
+                    <span class="quote-status-pill ${isCol ? 'pill-collected' : 'pill-locked'}">
+                      ${isCol ? '✓ 已收集' : '○ 海上巡航中'}
+                    </span>
+                  </div>
+                  <div class="quote-card-body">
+                    <p class="quote-saying">「${phil.quote}」</p>
+                    <div class="quote-insight-box">
+                      <b>心靈小語：</b>${phil.insight}
+                    </div>
+                    <div class="quote-psych-box">
+                      <b>心理學對話：</b>${phil.psychologyConnection}
+                    </div>
+                  </div>
+                  <div class="quote-card-footer">
+                    <button type="button" class="btn-sm quote-to-note-btn" data-quote-phil="${phil.id}">
+                      📌 引用此名言至隨堂筆記
+                    </button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
           </div>
         </div>
       `;
@@ -477,6 +544,24 @@ export function setupPersonalKnowledge(options = {}) {
           notesData.notes[activeCourseId] = (notesData.notes[activeCourseId] || '') + quoteText;
           saveKnowledgeNotes(notesData);
           toast?.(`已將【${card.title}】引用至該課筆記！`);
+          render();
+        });
+      });
+    }
+
+    if (activeTab === 'quotes') {
+      dialog.querySelectorAll('.quote-to-note-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const philId = btn.dataset.quotePhil;
+          const phil = PHILOSOPHERS_DATA.find(p => p.id === philId);
+          if (!phil) return;
+
+          activeTab = 'notes';
+          activeCourseId = phil.relatedCourseId || 'general';
+          const quoteText = `\n\n> ⛵ **【${phil.name}】（${phil.era}）名言摘錄**\n> 「${phil.quote}」\n> *哲人小語：* ${phil.insight}\n> *心理學反思：*\n`;
+          notesData.notes[activeCourseId] = (notesData.notes[activeCourseId] || '') + quoteText;
+          saveKnowledgeNotes(notesData);
+          toast?.(`已將【${phil.name}】名言引用至筆記！`);
           render();
         });
       });

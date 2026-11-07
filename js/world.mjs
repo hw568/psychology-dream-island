@@ -1,30 +1,30 @@
 export const PSYCHOLOGY_ISLAND_LAYOUT = [
-  { id: 'center', x: 0, z: 0, radius: 14.5, elevation: 3.8 },
-  { id: 'island-personal', x: -4.0, z: -68.0, radius: 12.0, elevation: 3.2 },
-  { id: 'island-01', x: -52.0, z: -26.0, radius: 12.2, elevation: 2.2 },
-  { id: 'island-02', x: -55.0, z: 36.0, radius: 13.0, elevation: 1.4 },
-  { id: 'island-03', x: -14.0, z: 68.0, radius: 13.5, elevation: 3.6 },
-  { id: 'island-04', x: 42.0, z: 56.0, radius: 12.8, elevation: 2.4 },
-  { id: 'island-05', x: 68.0, z: 12.0, radius: 14.0, elevation: 1.6 },
-  { id: 'island-06', x: 46.0, z: -42.0, radius: 12.6, elevation: 4.4 }
+  { id: 'center', x: 0, z: 0, radius: 19.5, elevation: 4.6 },
+  { id: 'island-personal', x: -6.0, z: -92.0, radius: 16.5, elevation: 4.0 },
+  { id: 'island-01', x: -70.0, z: -35.0, radius: 16.5, elevation: 2.6 },
+  { id: 'island-02', x: -74.0, z: 48.0, radius: 17.5, elevation: 1.8 },
+  { id: 'island-03', x: -18.0, z: 92.0, radius: 18.0, elevation: 4.2 },
+  { id: 'island-04', x: 56.0, z: 75.0, radius: 17.2, elevation: 3.0 },
+  { id: 'island-05', x: 92.0, z: 16.0, radius: 18.5, elevation: 2.0 },
+  { id: 'island-06', x: 62.0, z: -58.0, radius: 17.0, elevation: 5.2 }
 ];
 
 export const BRIDGE_STYLES = [
-  { id: 'stone', name: '宏偉大理石大道橋', profile: 'arch', arc: 1.5, width: 4.2, color: '#ded7c9' },
-  { id: 'grand-stairs', name: '皇家階梯天橋', profile: 'stairs', arc: 0, width: 4.4, color: '#f4e3c4' },
-  { id: 'glass', name: '光芒水晶大道橋', profile: 'arch', arc: 1.3, width: 4.0, color: '#d6c8ee' },
-  { id: 'covered', name: '宏偉長廊亭橋', profile: 'arch', arc: 0.35, width: 4.2, color: '#cdb4a2' },
-  { id: 'lantern-arc', name: '彩虹心靈明燈橋', profile: 'arch', arc: 1.4, width: 4.2, color: '#e7c8b1' },
-  { id: 'rope', name: '群島懸索金橋', profile: 'sag', arc: -0.65, width: 3.8, color: '#bfa08a' }
+  { id: 'stone', name: '宏偉大理石大道橋', profile: 'arch', arc: 2.0, width: 5.8, color: '#ded7c9' },
+  { id: 'grand-stairs', name: '皇家階梯天橋', profile: 'stairs', arc: 0, width: 6.0, color: '#f4e3c4' },
+  { id: 'glass', name: '光芒水晶大道橋', profile: 'arch', arc: 1.8, width: 5.6, color: '#d6c8ee' },
+  { id: 'covered', name: '宏偉長廊亭橋', profile: 'arch', arc: 0.45, width: 5.8, color: '#cdb4a2' },
+  { id: 'lantern-arc', name: '彩虹心靈明燈橋', profile: 'arch', arc: 1.9, width: 5.8, color: '#e7c8b1' },
+  { id: 'rope', name: '群島懸索金橋', profile: 'sag', arc: -0.85, width: 5.4, color: '#bfa08a' }
 ];
 
 export function bridgeRoute(from, to, style) {
   if (!style) return [from, to];
   const length = Math.hypot(to.x - from.x, to.z - from.z);
-  const entry = Math.min(length * 0.32, style.landingStart ?? 1.2);
-  const exit = Math.min(length * 0.32, style.landingEnd ?? 1.2);
+  const entry = Math.min(length * 0.32, style.landingStart ?? 1.6);
+  const exit = Math.min(length * 0.32, style.landingEnd ?? 1.6);
   const ramp = Math.max(0.1, length - entry - exit);
-  const count = Math.max(22, Math.ceil(length / 0.5), Math.ceil(Math.abs(to.y - from.y) / 0.12 * length / ramp));
+  const count = Math.max(26, Math.ceil(length / 0.55), Math.ceil(Math.abs(to.y - from.y) / 0.12 * length / ramp));
   const start = entry / length;
   const end = 1 - exit / length;
   const ts = [start, end, 1];
@@ -53,10 +53,10 @@ export function layoutFor(count) {
   if (count === 6) {
     return PSYCHOLOGY_ISLAND_LAYOUT;
   }
-  const radius = Math.max(48, 24 / Math.sin(Math.PI / count));
+  const radius = Math.max(65, 32 / Math.sin(Math.PI / count));
   return [
-    { id: 'center', x: 0, z: 0, radius: 14.5, elevation: 3.8 },
-    { id: 'island-personal', x: -4.0, z: -68.0, radius: 12.0, elevation: 3.2 },
+    { id: 'center', x: 0, z: 0, radius: 19.5, elevation: 4.6 },
+    { id: 'island-personal', x: -6.0, z: -92.0, radius: 16.5, elevation: 4.0 },
     ...Array.from({ length: count }, (_, i) => {
       const step = (Math.PI * 2) / count;
       const angle = -2.7 + i * step;
@@ -64,8 +64,8 @@ export function layoutFor(count) {
         id: `island-${String(i + 1).padStart(2, '0')}`,
         x: Math.cos(angle) * radius,
         z: Math.sin(angle) * radius * 0.92,
-        radius: 12.0 + (i % 3) * 0.8,
-        elevation: 1.2 + ((i * 1.6) % 3.6)
+        radius: 16.0 + (i % 3) * 1.0,
+        elevation: 1.6 + ((i * 1.6) % 3.6)
       };
     })
   ];
@@ -81,8 +81,8 @@ export function bridgeStylesFor(count) {
       id: variant ? `${base.id}-${variant + 1}` : base.id,
       name: variant ? `${base.name} · ${variant + 1}` : base.name,
       variant,
-      width: base.width + variant * 0.05,
-      arc: base.arc + (base.profile === 'arch' ? variant * 0.05 : 0)
+      width: base.width + variant * 0.08,
+      arc: base.arc + (base.profile === 'arch' ? variant * 0.08 : 0)
     };
   });
 }

@@ -266,8 +266,8 @@ export function createCharacterController(scene, network, locations, camera, con
           const p1 = path.points[i];
           const p2 = path.points[i + 1];
           const dist = distToSegment(x, z, p1.x, p1.z, p2.x, p2.z);
-          // Widened to 2.5 units to match wider 4m+ bridge decks
-          if (dist < 2.5) {
+          // Widened to 3.4 units to match grand 5.8m+ bridge decks
+          if (dist < 3.4) {
             const t = Math.max(0, Math.min(1, projectionFactor(x, z, p1.x, p1.z, p2.x, p2.z)));
             const bridgeY = p1.y + (p2.y - p1.y) * t + 0.35;
             return { y: bridgeY, island: path.fromIsland || 'bridge' };

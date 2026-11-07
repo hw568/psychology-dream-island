@@ -79,6 +79,12 @@ export function createAnimeCharacter(index = 0, owner = false, person = null) {
       torus(arm, 0.075, 0.012, suitTrim, 0, -0.26, 0);
       // Hand
       ball(arm, 0.075, skin, 0, -0.30, 0);
+
+      // Gold mechanical wristwatch on left wrist
+      if (side === -1) {
+        torus(arm, 0.082, 0.014, gold, 0, -0.27, 0);
+        box(arm, 0.05, 0.05, 0.018, '#ffffff', 0, -0.27, 0.075);
+      }
       arms.push(arm);
     }
 
@@ -101,9 +107,10 @@ export function createAnimeCharacter(index = 0, owner = false, person = null) {
     for (let by = -0.10; by <= 0.05; by += 0.08) {
       ball(torso, 0.018, gold, 0.02, by, 0.17);
     }
-    // Breast pocket with golden fountain pen
+    // Breast pocket with golden fountain pen & silk pocket square
     box(torso, 0.08, 0.018, 0.02, suitTrim, -0.15, 0.12, 0.17);
-    cyl(torso, 0.006, 0.006, 0.055, gold, -0.14, 0.14, 0.175);
+    cyl(torso, 0.006, 0.006, 0.055, gold, -0.16, 0.14, 0.175);
+    box(torso, 0.045, 0.035, 0.018, '#fffdf2', -0.12, 0.14, 0.175);
 
     // ---- Hardcover Book: 《現代心理學》 in hand ----
     const bookGroup = new THREE.Group();
@@ -151,9 +158,18 @@ export function createAnimeCharacter(index = 0, owner = false, person = null) {
       cyl(headGroup, 0.005, 0.005, 0.20, gold, side * 0.17, 0.02, 0.10).rotation.x = Math.PI / 2;
       // Eyes behind glasses
       ball(headGroup, 0.024, '#241c18', side * 0.105, 0.01, 0.19);
+      ball(headGroup, 0.008, '#ffffff', side * 0.108, 0.018, 0.205); // Eye sparkling highlight
     }
     // Bridge between lenses
     cyl(headGroup, 0.006, 0.006, 0.06, gold, 0, 0.02, 0.215).rotation.z = Math.PI / 2;
+
+    // Eyebrows
+    box(headGroup, 0.065, 0.014, 0.02, '#2b292e', -0.105, 0.085, 0.20);
+    box(headGroup, 0.065, 0.014, 0.02, '#2b292e', 0.105, 0.085, 0.20);
+
+    // Scholarly warm cheek blush
+    ball(headGroup, 0.04, '#f48fb1', -0.14, -0.04, 0.18, { transparent: true, opacity: 0.4 });
+    ball(headGroup, 0.04, '#f48fb1', 0.14, -0.04, 0.18, { transparent: true, opacity: 0.4 });
 
     // Friendly scholarly smile
     torus(headGroup, 0.04, 0.008, '#a85d50', 0, -0.09, 0.205).rotation.x = 0.5;
@@ -174,6 +190,8 @@ export function createAnimeCharacter(index = 0, owner = false, person = null) {
     // Puppy Body (layered fluffy balls)
     const pupBody = ball(pup, 0.17, furWhite, 0, 0.20, 0);
     pupBody.scale.set(0.9, 0.95, 1.25);
+    // Fluffy chest tuft
+    ball(pup, 0.13, furWhite, 0, 0.22, 0.12);
 
     // Puppy Head (big fluffy marshmallow)
     const pupHead = ball(pup, 0.16, furWhite, 0, 0.34, 0.12);
@@ -194,10 +212,12 @@ export function createAnimeCharacter(index = 0, owner = false, person = null) {
     // Little black snout & nose
     ball(pupHead, 0.038, furWhite, 0, -0.02, 0.15);
     ball(pupHead, 0.018, pupNose, 0, 0.005, 0.18);
+    // Open happy pink tongue
+    ball(pupHead, 0.018, '#ff80ab', 0, -0.046, 0.165);
 
-    // Cute red collar with gold tag
+    // Cute red collar with gold chime bell
     torus(pup, 0.12, 0.016, collarRed, 0, 0.26, 0.06);
-    ball(pup, 0.02, gold, 0, 0.23, 0.16);
+    ball(pup, 0.028, gold, 0, 0.20, 0.18);
 
     // 4 Fluffy little paws
     const pupLegs = [];

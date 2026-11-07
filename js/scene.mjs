@@ -11,6 +11,7 @@ import {CSS2DRenderer,CSS2DObject} from '../vendor/CSS2DRenderer.js';
 import {buildNetwork,pointAt} from './navigation.mjs';
 import {createResidents} from './residents.mjs';
 import {createCharacterController} from './character-controller.mjs';
+import {createPhilosopherBoats} from './philosopher-boats.mjs';
 
 export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFocus,onPersonalKnowledge}){
  const ISLAND_LAYOUT=layoutFor(data.courses.length),palette=paletteFor(data.appearance);
@@ -139,65 +140,67 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
  locations.set('center',center);
 
  const depthC=mainLayout.elevation+1.5;
- // Tier 1 (Base): Broad lawn ring (R=14.5)
- cyl(center,14.2,15.2,depthC,rock,0,.2-depthC/2,0,16);
- cyl(center,14.5,14.5,.25,orange,0,.14,0,16);
- center.userData.land=cyl(center,14.2,14.3,.22,grass,0,.35,0,16);
- // Tier 2 (Middle): Marble Arcade Colonnade Terrace (R=10.2, elevated +0.8m)
- cyl(center,10.2,10.8,.85,cream,0,.8,0,16);
- cyl(center,10.0,10.0,.18,mat('#f5ebd9'),0,1.25,0,16);
- // Tier 3 (Upper): Golden Sanctuary Podium (R=6.2, elevated +1.6m)
- cyl(center,6.2,6.8,.9,cream,0,1.7,0,16);
- cyl(center,6.0,6.0,.15,mat('#ffe5be'),0,2.15,0,16);
+ const rc=mainLayout.radius;
+ // Tier 1 (Base): Broad lawn ring (R=rc)
+ cyl(center,rc*.96,rc*1.04,depthC,rock,0,.2-depthC/2,0,16);
+ cyl(center,rc*.98,rc*.98,.25,orange,0,.14,0,16);
+ center.userData.land=cyl(center,rc*.96,rc*.97,.22,grass,0,.35,0,16);
+ // Tier 2 (Middle): Marble Arcade Colonnade Terrace (R=rc*0.68, elevated +0.8m)
+ cyl(center,rc*.68,rc*.72,.85,cream,0,.8,0,16);
+ cyl(center,rc*.66,rc*.66,.18,mat('#f5ebd9'),0,1.25,0,16);
+ // Tier 3 (Upper): Golden Sanctuary Podium (R=rc*0.42, elevated +1.6m)
+ cyl(center,rc*.42,rc*.46,.9,cream,0,1.7,0,16);
+ cyl(center,rc*.40,rc*.40,.15,mat('#ffe5be'),0,2.15,0,16);
 
  const centerLandmarkStart=center.children.length;
 
  // 12 Classical Corinthian Columns with Arched Entablature
+ const colR = rc * 0.54;
  for(let c=0; c<12; c++){
    const angle=c*Math.PI*2/12;
-   const px=Math.sin(angle)*8.2, pz=Math.cos(angle)*8.2;
-   cyl(center,.26,.26,3.6,white,px,3.1,pz);
-   cyl(center,.38,.30,.38,cream,px,1.4,pz);
-   cyl(center,.30,.38,.38,cream,px,4.9,pz);
+   const px=Math.sin(angle)*colR, pz=Math.cos(angle)*colR;
+   cyl(center,.32,.32,4.2,white,px,3.4,pz);
+   cyl(center,.46,.38,.45,cream,px,1.4,pz);
+   cyl(center,.38,.46,.45,cream,px,5.4,pz);
  }
  // Grand Rotunda Library Dome
- cyl(center,3.4,3.8,3.2,cream,0,3.8,0,16);
- cyl(center,2.8,2.8,3.6,orange,0,6.2,0,16);
- cone(center,3.8,2.6,teal,0,9.2,0,16);
+ cyl(center,4.2,4.8,3.8,cream,0,4.2,0,16);
+ cyl(center,3.5,3.5,4.2,orange,0,7.2,0,16);
+ cone(center,4.8,3.2,teal,0,10.8,0,16);
 
  // Fountain of Metacognition
- cyl(center,2.0,2.0,.4,teal,0,10.6);
- const halo=torus(center,2.6,.12,gold,0,12.0,0);
+ cyl(center,2.5,2.5,.45,teal,0,12.4);
+ const halo=torus(center,3.2,.15,gold,0,14.0,0);
  animated.push({obj:halo,kind:'halo'});
 
  // 3D Psychology Symbol: Greek Letter Psi (Ψ) Monument
  const psiGroup=new THREE.Group();
- psiGroup.position.set(0,13.2,0);
+ psiGroup.position.set(0,15.6,0);
  center.add(psiGroup);
- cyl(psiGroup,.22,.22,3.6,gold,0,0,0);
- const psiArmL=torus(psiGroup,1.2,.15,gold,-.80,.45,0); psiArmL.rotation.z=Math.PI/4;
- const psiArmR=torus(psiGroup,1.2,.15,gold,.80,.45,0); psiArmR.rotation.z=-Math.PI/4;
- box(psiGroup,.55,.18,.20,gold,-1.65,1.3,0);
- box(psiGroup,.55,.18,.20,gold,1.65,1.3,0);
- box(psiGroup,.55,.18,.20,gold,0,1.85,0);
- ball(psiGroup,.42,warm,0,2.2,0);
+ cyl(psiGroup,.26,.26,4.4,gold,0,0,0);
+ const psiArmL=torus(psiGroup,1.4,.18,gold,-1.0,.55,0); psiArmL.rotation.z=Math.PI/4;
+ const psiArmR=torus(psiGroup,1.4,.18,gold,1.0,.55,0); psiArmR.rotation.z=-Math.PI/4;
+ box(psiGroup,.65,.22,.24,gold,-2.0,1.55,0);
+ box(psiGroup,.65,.22,.24,gold,2.0,1.55,0);
+ box(psiGroup,.65,.22,.24,gold,0,2.2,0);
+ ball(psiGroup,.50,warm,0,2.6,0);
  animated.push({obj:psiGroup,kind:'halo'});
 
  // Statues, Benches and Trees in the vast Academic Promenade
- bench(center,-7.2,3.2,0.4);
- bench(center,7.2,3.2,-0.4);
- bench(center,0,-8.5,Math.PI);
- tree(center,-10.8,-4.5,1,1.3);
- tree(center,10.8,-4.5,0,1.3);
- tree(center,-9.8,6.2,2,1.2);
- tree(center,9.8,6.2,0,1.2);
+ bench(center,-rc*.62,3.2,0.4);
+ bench(center,rc*.62,3.2,-0.4);
+ bench(center,0,-rc*.7,Math.PI);
+ tree(center,-rc*.72,-rc*.35,1,1.5);
+ tree(center,rc*.72,-rc*.35,0,1.5);
+ tree(center,-rc*.68,rc*.45,2,1.4);
+ tree(center,rc*.68,rc*.45,0,1.4);
 
  center.children.slice(centerLandmarkStart).forEach(o=>o.traverse(m=>{if(m.isMesh)m.userData.building='center';}));
 
  // =========================================================================
  // 1.5 PERSONAL ISLAND: 個人心智島 · 我的知識寶庫 (Personal Knowledge Sanctuary)
  // =========================================================================
- const personalLayout = ISLAND_LAYOUT.find(n => n.id === 'island-personal') || { id: 'island-personal', x: -4.0, z: -68.0, radius: 12.0, elevation: 3.2 };
+ const personalLayout = ISLAND_LAYOUT.find(n => n.id === 'island-personal') || { id: 'island-personal', x: -4.0, z: -68.0, radius: 16.5, elevation: 4.0 };
  const personal = new THREE.Group();
  personal.position.set(personalLayout.x, personalLayout.elevation, personalLayout.z);
  personal.userData.radius = personalLayout.radius;
@@ -207,66 +210,67 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
  locations.set('island-personal', personal);
 
  const depthP = personalLayout.elevation + 1.5;
+ const rp = personalLayout.radius;
  const personalLandmarkStart = personal.children.length;
 
  // Tier 1: Floating Amethyst & Celestial Stone Foundation
- cyl(personal, 11.6, 12.5, depthP, mat('#2d203a'), 0, .2 - depthP / 2, 0, 16);
- cyl(personal, 11.8, 11.8, .22, gold, 0, .14, 0, 16);
- personal.userData.land = cyl(personal, 11.6, 11.7, .20, mat('#856b9c'), 0, .32, 0, 16);
+ cyl(personal, rp*.95, rp*1.05, depthP, mat('#2d203a'), 0, .2 - depthP / 2, 0, 16);
+ cyl(personal, rp*.98, rp*.98, .22, gold, 0, .14, 0, 16);
+ personal.userData.land = cyl(personal, rp*.95, rp*.96, .20, mat('#856b9c'), 0, .32, 0, 16);
 
- // Tier 2: Marble Study Terrace (R=7.8)
- cyl(personal, 7.8, 8.4, .85, cream, 0, .80, 0, 16);
- cyl(personal, 7.6, 7.6, .18, mat('#f3e8f8'), 0, 1.25, 0, 16);
+ // Tier 2: Marble Study Terrace (R=rp*0.65)
+ cyl(personal, rp*.65, rp*.70, .85, cream, 0, .80, 0, 16);
+ cyl(personal, rp*.62, rp*.62, .18, mat('#f3e8f8'), 0, 1.25, 0, 16);
 
  // Tier 3: Mind Sanctum Pavilion (知識研習聖所)
  for (let c = 0; c < 6; c++) {
    const angle = c * Math.PI / 5 + Math.PI / 2;
-   const px = Math.sin(angle) * 4.2, pz = Math.cos(angle) * 4.2;
-   cyl(personal, .18, .18, 3.2, white, px, 2.8, pz);
-   ball(personal, .24, gold, px, 4.5, pz);
+   const px = Math.sin(angle) * rp * 0.36, pz = Math.cos(angle) * rp * 0.36;
+   cyl(personal, .22, .22, 3.8, white, px, 3.1, pz);
+   ball(personal, .28, gold, px, 5.2, pz);
  }
- torus(personal, 4.4, .18, gold, 0, 4.5, 0);
- cone(personal, 4.2, 1.8, mat('#4a2b66'), 0, 5.5, 0, 16);
- ball(personal, .45, warm, 0, 6.6, 0);
+ torus(personal, rp*0.38, .22, gold, 0, 5.2, 0);
+ cone(personal, rp*0.36, 2.2, mat('#4a2b66'), 0, 6.4, 0, 16);
+ ball(personal, .55, warm, 0, 7.8, 0);
 
  // Executive Knowledge Desk with Open Glowing Tome
- box(personal, 2.6, .85, 1.4, mat('#4e342e'), 0, 1.35, -1.2);
- box(personal, .85, .08, .55, white, 0, 1.82, -1.2);
- box(personal, .40, .09, .52, mat('#fdf5e6'), -.2, 1.83, -1.2);
- box(personal, .40, .09, .52, mat('#fdf5e6'), .2, 1.83, -1.2);
- cyl(personal, .08, .12, .45, gold, -.9, 2.0, -1.2);
- ball(personal, .18, mat('#2e7d32', { emissive: '#4caf50', emissiveIntensity: 0.8 }), -.9, 2.25, -1.2);
+ box(personal, 3.2, 1.0, 1.6, mat('#4e342e'), 0, 1.45, -1.5);
+ box(personal, 1.1, .10, .7, white, 0, 2.0, -1.5);
+ box(personal, .50, .11, .65, mat('#fdf5e6'), -.26, 2.02, -1.5);
+ box(personal, .50, .11, .65, mat('#fdf5e6'), .26, 2.02, -1.5);
+ cyl(personal, .10, .15, .55, gold, -1.1, 2.25, -1.5);
+ ball(personal, .22, mat('#2e7d32', { emissive: '#4caf50', emissiveIntensity: 0.8 }), -1.1, 2.55, -1.5);
 
  // 6 Knowledge Resonance Crystal Pedestals (representing the 6 domains)
  const crystalColors = ['#00b4d8', '#ffb703', '#3a86ff', '#e63946', '#8338ec', '#fb5607'];
  for (let k = 0; k < 6; k++) {
    const angle = -1.8 + k * (Math.PI * 2 / 7);
-   const px = Math.cos(angle) * 5.6, pz = Math.sin(angle) * 5.6;
-   cyl(personal, .35, .45, 1.4, cream, px, 1.5, pz);
-   ball(personal, .35, mat(crystalColors[k], { roughness: .2, metalness: .3, emissive: crystalColors[k], emissiveIntensity: 0.5 }), px, 2.5, pz);
-   const cryHalo = torus(personal, .55, .05, gold, px, 2.5, pz);
+   const px = Math.cos(angle) * rp * 0.48, pz = Math.sin(angle) * rp * 0.48;
+   cyl(personal, .42, .55, 1.6, cream, px, 1.6, pz);
+   ball(personal, .42, mat(crystalColors[k], { roughness: .2, metalness: .3, emissive: crystalColors[k], emissiveIntensity: 0.5 }), px, 2.8, pz);
+   const cryHalo = torus(personal, .65, .06, gold, px, 2.8, pz);
    animated.push({ obj: cryHalo, kind: 'halo' });
  }
 
  // Floating Mind Rings
- const mindRing = torus(personal, 2.6, .10, gold, 0, 7.6, 0);
+ const mindRing = torus(personal, 3.2, .12, gold, 0, 9.0, 0);
  animated.push({ obj: mindRing, kind: 'halo' });
 
  // Companion NPC: 思思 (Mind Guide)
  const guideGroup = new THREE.Group();
- guideGroup.position.set(1.4, 1.3, -1.2);
+ guideGroup.position.set(1.8, 1.3, -1.5);
  personal.add(guideGroup);
- cyl(guideGroup, .22, .32, 1.1, mat('#ba68c8'), 0, .55, 0);
- ball(guideGroup, .26, mat('#ffe0b2'), 0, 1.25, 0);
- cone(guideGroup, .28, .55, mat('#4a148c'), 0, 1.6, 0);
- box(guideGroup, .3, .4, .08, mat('#ffe082'), -.3, .8, .2);
+ cyl(guideGroup, .26, .38, 1.3, mat('#ba68c8'), 0, .65, 0);
+ ball(guideGroup, .32, mat('#ffe0b2'), 0, 1.45, 0);
+ cone(guideGroup, .34, .65, mat('#4a148c'), 0, 1.9, 0);
+ box(guideGroup, .36, .48, .1, mat('#ffe082'), -.36, .95, .24);
  guideGroup.userData.resident = 'guide-sisi';
 
  // Scenic Benches and Cherry Blossom Trees overlooking the ocean
- bench(personal, -5.5, 3.2, 0.4);
- bench(personal, 5.5, 3.2, -0.4);
- tree(personal, -7.8, -2.8, 2, 1.3);
- tree(personal, 7.8, -2.8, 2, 1.3);
+ bench(personal, -rp*.58, 3.2, 0.4);
+ bench(personal, rp*.58, 3.2, -0.4);
+ tree(personal, -rp*.72, -rp*.25, 2, 1.5);
+ tree(personal, rp*.72, -rp*.25, 2, 1.5);
 
  personal.children.slice(personalLandmarkStart).forEach(o => o.traverse(m => {
    if (m.isMesh) m.userData.building = 'island-personal';
@@ -550,6 +554,14 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
 
  const halloween=createDecorations(scene,camera,locations,data.appearance);
  const environment=createSeascape(scene,locations);
+ const philosopherBoats=createPhilosopherBoats(scene,{
+   onOpenQuote: phil => onPersonalKnowledge?.(),
+   toast: msg => {
+     const t = document.querySelector('#toast');
+     if (t) { t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3200); }
+   }
+ });
+ pickables.push(...philosopherBoats.pickables);
 
  const waveMat=mat('#ece1ed');
  for(let i=0;i<65;i++){
@@ -715,6 +727,7 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
 
      controller.update(dt);
      residents.update(dt);
+     philosopherBoats.update(dt);
      controller.setResidentsCache(residents.snapshot());
 
      halloween.update(dt);
@@ -894,7 +907,9 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
    raycaster.setFromCamera(pointer,camera);
 
    const hit=raycaster.intersectObjects(pickables,false)[0];
-   if(hit?.object.userData.resident){
+   if(hit?.object.userData.isPhilosopher){
+     philosopherBoats.openDialog(hit.object.userData.philosopherId);
+   }else if(hit?.object.userData.resident){
      onResident?.(hit.object.userData.resident);
    }else if(hit?.object.userData.host){
      onHost?.();
