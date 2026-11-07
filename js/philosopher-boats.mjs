@@ -19,6 +19,8 @@ export const PHILOSOPHERS_DATA = [
     quote: '保留你思考的權利，因為就算思考錯誤，也比完全不思考要好。',
     insight: '「獨立思辨是心靈最崇高的自由。當大腦勇敢質疑未經檢驗的常規，我們才真正站在自我意識的起點。」',
     psychologyConnection: '連結「感知覺醒島」與「理性思維島」：認知心理學中的元認知（Metacognition）與批判性思維。',
+    relatedCourseId: 'island-01',
+    relatedCourseName: '感知覺醒島',
     route: { radiusX: 52, radiusZ: 85, speed: 0.024, phase: 0.2, height: -1.2 }
   },
   {
@@ -34,6 +36,8 @@ export const PHILOSOPHERS_DATA = [
     quote: '未經審視的人生是不值得活的。我唯一知道的事，就是我一無所知。',
     insight: '「真正的智慧始於承認自己的盲點。唯有不斷自我反思、探問內心深處的假設，靈魂才能擺脫偏見的牢籠。」',
     psychologyConnection: '連結「中央衛城」與「理性思維島」：認知行為治療（CBT）的蘇格拉底提問法與自我覺察。',
+    relatedCourseId: 'island-03',
+    relatedCourseName: '理性思維島',
     route: { radiusX: 88, radiusZ: 50, speed: 0.022, phase: 1.8, height: -1.2 }
   },
   {
@@ -49,6 +53,8 @@ export const PHILOSOPHERS_DATA = [
     quote: '人不是生而為女人，而是成為女人。唯有自由地選擇自己，靈魂才能抵達真實。',
     insight: '「我們的自我不是宿命決定的固定標本，而是在一次次有意識的抉擇中創造出來的。擁抱你的自由，無懼世界的目光。」',
     psychologyConnection: '連結「人格演繹島」與「動機與情緒島」：發展心理學中的自我認同探索、性別基模與自我實現。',
+    relatedCourseId: 'island-05',
+    relatedCourseName: '人格演繹島',
     route: { radiusX: 78, radiusZ: 92, speed: 0.020, phase: 3.4, height: -1.2 }
   },
   {
@@ -64,6 +70,8 @@ export const PHILOSOPHERS_DATA = [
     quote: '平庸之惡源於停止思考；思考本身就是一種危險的事業，但完全不思考更是無比危險。',
     insight: '「當一個人停止獨立思考、盲目服從群體常態時，心靈便陷入最沉重的昏睡。思考是保護我們不被集體盲從吞噬的唯一防線。」',
     psychologyConnection: '連結「社會共振島」：社會心理學中的阿許從眾實驗、米爾格倫服從權威與責任分散效應。',
+    relatedCourseId: 'island-06',
+    relatedCourseName: '社會共振島',
     route: { radiusX: 96, radiusZ: 68, speed: 0.019, phase: 4.6, height: -1.2 }
   },
   {
@@ -79,6 +87,8 @@ export const PHILOSOPHERS_DATA = [
     quote: '自我不是孤立的幽靈，而是在與他人的關係中不斷被經驗與理解的心靈存在。',
     insight: '「心理學的核心不是冷冰冰的數據，而是鮮活的自我經驗。每一刻的自尊與心智成長，都源於你如何看待自己與世界的連結。」',
     psychologyConnection: '連結「記憶之宮島」與「人格演繹島」：配對聯想記憶研究與自尊心理學。',
+    relatedCourseId: 'island-02',
+    relatedCourseName: '記憶之宮島',
     route: { radiusX: 65, radiusZ: 80, speed: 0.025, phase: 5.7, height: -1.2 }
   },
   {
@@ -94,6 +104,8 @@ export const PHILOSOPHERS_DATA = [
     quote: '認識自己是所有智慧的源頭。重複的行為塑造了我們，因此卓越不是一種行為，而是一種習慣。',
     insight: '「心智宛如一塊白板，世界在上面刻下記憶。找到理智與情感的黃金中庸之道，便是心靈最豐盛的幸福。」',
     psychologyConnection: '連結「記憶之宮島」與「動機與情緒島」：行為習慣養成、經驗主義與正向心理學（Eudaimonia）。',
+    relatedCourseId: 'island-04',
+    relatedCourseName: '動機與情緒島',
     route: { radiusX: 84, radiusZ: 84, speed: 0.021, phase: 2.7, height: -1.2 }
   },
   {
@@ -109,6 +121,8 @@ export const PHILOSOPHERS_DATA = [
     quote: '我思，故我在（Cogito, ergo sum）。懷疑一切，方能抵達不可動搖的真實。',
     insight: '「哪怕感知有時會被錯覺欺騙，正在質疑與思考的我，卻是絕對真實的存在。大膽運用你的理性之光照亮黑暗。」',
     psychologyConnection: '連結「感知覺醒島」：神經反射弧模型、身心關係與知覺懷疑論。',
+    relatedCourseId: 'island-01',
+    relatedCourseName: '感知覺醒島',
     route: { radiusX: 72, radiusZ: 62, speed: 0.026, phase: 0.9, height: -1.2 }
   }
 ];

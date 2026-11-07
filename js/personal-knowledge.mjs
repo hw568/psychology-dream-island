@@ -612,11 +612,17 @@ export function setupPersonalKnowledge(options = {}) {
     }
   }
 
-  function open(courseId = null) {
+  function open(courseId = null, quoteObj = null) {
     notesData = loadKnowledgeNotes();
     if (courseId) {
       activeTab = 'notes';
       activeCourseId = courseId;
+    }
+    if (quoteObj) {
+      const quoteText = `\n\n> ⛵ **【${quoteObj.name}】（${quoteObj.era}）名言摘錄**\n> 「${quoteObj.quote}」\n> *哲人小語：* ${quoteObj.insight}\n> *心理學反思：*\n`;
+      notesData.notes[activeCourseId] = (notesData.notes[activeCourseId] || '') + quoteText;
+      saveKnowledgeNotes(notesData);
+      toast?.(`已將【${quoteObj.name.split(' ')[0]}】名言引用至筆記！`);
     }
     render();
     dialog.showModal();

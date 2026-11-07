@@ -555,7 +555,7 @@ export function createScene(host,data,{onSelect,onFailure,onHost,onResident,onFo
  const halloween=createDecorations(scene,camera,locations,data.appearance);
  const environment=createSeascape(scene,locations);
  const philosopherBoats=createPhilosopherBoats(scene,{
-   onOpenQuote: phil => onPersonalKnowledge?.(),
+   onOpenQuote: phil => onPersonalKnowledge?.(phil?.relatedCourseId, phil),
    toast: msg => {
      const t = document.querySelector('#toast');
      if (t) { t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3200); }
